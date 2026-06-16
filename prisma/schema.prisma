@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  password        String?
+  image           String?
+  bio             String?
+  currentGoal     String?
+  commitmentLevel Int       @default(5)
+  challenges      String[]  @default([])
+  futureSelfGoal  String?
+  xp              Int       @default(0)
+  level           Int       @default(1)
+  streak          Int       @default(0)
+  longestStreak   Int       @default(0)
+  lastCheckIn     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  ownedSquads     Squad[]       @relation("SquadOwner")
+  memberships     SquadMember[]
+  tasks           Task[]
+  chatMessages    ChatMessage[]
+  roadmapNodes    RoadmapNode[]
+  futureSelf      FutureSelf?
+  roomMessages    RoomMessage[]        // ← TAMBAHIN
+  studySessions   StudySession[]       // ← TAMBAHIN
+
+  @@map("users")
+}
+
+model Squad {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  goal        String
+  category    String   @default("Umum")
+  icon        String   @default("🚀")
+  isPublic    Boolean  @default(true)
+  inviteCode  String   @unique @default(cuid())
+  memberCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerId      String
+  owner        User           @relation("SquadOwner", fields: [ownerId], references: [id])
+  members      SquadMember[]
+  chatMessages ChatMessage[]
+  tasks        SquadTask[]
+  rooms        Room[]
+  userTasks    Task[]
+
+  @@map("squads")
+}
+
+model SquadMember {
+  id       String   @id @default(cuid())
+  role     String   @default("MEMBER")
+  joinedAt DateTime @default(now())
+
+  squadId String
+  userId  String
+
+  squad Squad @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([squadId, userId])
+  @@map("squad_members")
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  isCompleted Boolean   @default(false)
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId  String
+  squadId String?
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  squad Squad? @relation(fields: [squadId], references: [id], onDelete: SetNull)
+
+  @@map("tasks")
+}
+
+model SquadTask {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  squadId String
+  squad   Squad  @relation(fields: [squadId], references: [id], onDelete: Cascade)
+
+  @@map("squad_tasks")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  squadId String
+  userId  String
+
+  squad Squad @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([squadId, createdAt])
+  @@map("chat_messages")
+}
+
+model RoadmapNode {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  isCompleted Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId   String
+  parentId String?
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent   RoadmapNode?  @relation("RoadmapChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children RoadmapNode[] @relation("RoadmapChildren")
+
+  @@map("roadmap_nodes")
+}
+
+model FutureSelf {
+  id        String   @id @default(cuid())
+  content   String
+  goal      String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("future_self")
+}
+
+// ──────────────────────────────────────────────
+// ROOM SYSTEM
+// ──────────────────────────────────────────────
+model Room {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   @default("CHAT") // CHAT, VOICE, VIDEO, STUDY
+  squadId   String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  squad          Squad           @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  roomMessages   RoomMessage[]
+  studySessions  StudySession[]
+
+  @@map("rooms")
+}
+
+model RoomMessage {
+  id        String   @id @default(cuid())
+  content   String
+  roomId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+  @@map("room_messages")
+}
+
+model StudySession {
+  id        String    @id @default(cuid())
+  roomId    String
+  userId    String
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+  duration  Int       @default(0) // in seconds
+  status    String    @default("STUDYING") // STUDYING, PAUSED, COMPLETED
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("study_sessions")
+}
