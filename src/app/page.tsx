@@ -149,7 +149,10 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/auth/me").then(r => r.json()).then(d => setLoggedIn(d.authenticated || false)).catch(() => {});
+    fetch("/api/auth/me")
+      .then(r => r.json())
+      .then(d => setLoggedIn(d?.authenticated || false))
+      .catch(() => setLoggedIn(false));
   }, []);
 
   // Scroll reveal observer
