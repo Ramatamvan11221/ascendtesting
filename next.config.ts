@@ -1,14 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   serverExternalPackages: ["@prisma/client", "better-auth"],
-
-  // Bypass TypeScript errors pas build
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
-  // Matiin dev indicators
+  typescript: { ignoreBuildErrors: true },
   devIndicators: false,
 };
 
