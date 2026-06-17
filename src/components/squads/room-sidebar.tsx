@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X, Trash2, ChevronLeft, ChevronRight, CheckSquare, Users, Bell, LogOut, Crown, MessageCircle, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -228,7 +228,8 @@ const STYLES = `
     background: rgba(0,0,0,0.5); 
   }
 
-  .mobile-toggle {
+  /* TOGGLE BUTTON - di kiri tengah */
+  .sidebar-toggle {
     position: fixed;
     top: 50%;
     left: 0;
@@ -236,7 +237,7 @@ const STYLES = `
     z-index: 35;
     width: 28px;
     height: 56px;
-    background: rgba(245,158,11,0.15);
+    background: rgba(245,158,11,0.12);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(245,158,11,0.2);
@@ -250,17 +251,18 @@ const STYLES = `
     transition: all 0.3s ease;
     padding: 0;
   }
-  .mobile-toggle:hover {
-    background: rgba(245,158,11,0.25);
+  .sidebar-toggle:hover {
+    background: rgba(245,158,11,0.2);
     width: 32px;
   }
-  .mobile-toggle svg {
+  .sidebar-toggle svg {
     width: 16px;
     height: 16px;
   }
   
+  /* Hanya tampil di mobile */
   @media(max-width:1023px) { 
-    .mobile-toggle { 
+    .sidebar-toggle { 
       display: flex; 
     } 
   }
@@ -270,6 +272,13 @@ const STYLES = `
   }
   @media(max-width:1023px){ 
     .desktop-collapse{display:none!important;} 
+  }
+
+  /* Animasi slide untuk toggle button */
+  .sidebar-toggle.hidden {
+    transform: translateY(-50%) translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
   }
 `;
 
@@ -294,8 +303,40 @@ export function RoomSidebar({
   const [creating, setCreating] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Untuk swipe detection
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
 
   useEffect(() => { setRooms(initialRooms); }, [initialRooms]);
+
+  // Handle swipe dari kiri
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchEndX - touchStartX.current;
+      const diffY = touchEndY - touchStartY.current;
+
+      // Swipe dari kiri ke kanan (lebih dari 50px) dan bukan swipe vertikal
+      if (diffX > 50 && Math.abs(diffX) > Math.abs(diffY) && touchStartX.current < 30) {
+        setMobileOpen(true);
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
 
   const handleCreate = async () => {
     if (!newName.trim() || creating) return;
@@ -507,8 +548,9 @@ export function RoomSidebar({
         </div>
       </div>
 
+      {/* Toggle Button - di kiri tengah */}
       <motion.button 
-        className="mobile-toggle" 
+        className={`sidebar-toggle ${mobileOpen ? 'hidden' : ''}`}
         onClick={() => setMobileOpen(true)}
         whileTap={{ scale: 0.9 }}
         initial={{ opacity: 0, x: -10 }}

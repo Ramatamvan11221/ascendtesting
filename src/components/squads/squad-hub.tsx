@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Target, Users, LogOut, ChevronLeft, ChevronRight, Trash2, Shield, CheckSquare, Bell, Crown, MessageCircle, BookOpen, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,9 +41,50 @@ const STYLES = `
   .hub-sb-leave:hover{color:#ef4444;background:rgba(239,68,68,0.04);}
   .hub-sidebar.collapsed .hub-sb-leave{justify-content:center;padding:10px;}
   .hub-main{flex:1;min-width:0;overflow-y:auto;background:#0a0f18;display:flex;flex-direction:column;}
-  .mobile-toggle{position:fixed;bottom:24px;left:16px;z-index:35;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#f97316);border:none;color:#0a0a0a;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(245,158,11,0.3);}
-  @media(max-width:1023px){.mobile-toggle{display:flex;}}
-  .mobile-toggle:hover{transform:scale(1.06);}
+  
+  /* TOGGLE BUTTON - di kiri tengah */
+  .sidebar-toggle {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    z-index: 35;
+    width: 28px;
+    height: 56px;
+    background: rgba(245,158,11,0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+    color: #f59e0b;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+  .sidebar-toggle:hover {
+    background: rgba(245,158,11,0.2);
+    width: 32px;
+  }
+  .sidebar-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+  .sidebar-toggle.hidden {
+    transform: translateY(-50%) translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  @media(max-width:1023px) { 
+    .sidebar-toggle { 
+      display: flex; 
+    } 
+  }
+
   .mobile-overlay{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,0.5);}
   @media(min-width:1024px){.mobile-overlay{display:none;}}
   
@@ -131,8 +172,40 @@ export function SquadHub({
   const [loading, setLoading] = useState(false);
   const MEMBERS_PER_PAGE = 20;
 
+  // Untuk swipe detection
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+
   useEffect(() => { setRooms(initialRooms); setLocalMembers(members); }, [initialRooms, members]);
   useEffect(() => { fetch(`/api/squads/${squadId}/notifications`).then(r => r.json()).then(d => setNotifications(Array.isArray(d) ? d : [])).catch(() => {}); }, [squadId]);
+
+  // Handle swipe dari kiri
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchEndX - touchStartX.current;
+      const diffY = touchEndY - touchStartY.current;
+
+      // Swipe dari kiri ke kanan (lebih dari 50px) dan bukan swipe vertikal
+      if (diffX > 50 && Math.abs(diffX) > Math.abs(diffY) && touchStartX.current < 30) {
+        setMobileOpen(true);
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId);
   const canManage = isOwner || isModerator;
@@ -350,9 +423,19 @@ export function SquadHub({
         
         <main className={`hub-main ${collapsed ? 'sidebar-collapsed' : ''}`}>{renderContent()}</main>
         
-        <motion.button className="mobile-toggle" onClick={() => setMobileOpen(true)} whileTap={{ scale: 0.95 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}><ChevronRight size={20} /></motion.button>
+        {/* Toggle Button - di kiri tengah */}
+        <motion.button 
+          className={`sidebar-toggle ${mobileOpen ? 'hidden' : ''}`}
+          onClick={() => setMobileOpen(true)}
+          whileTap={{ scale: 0.9 }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <ChevronRight size={16} />
+        </motion.button>
       </div>
-      <style>{`@media(min-width:1024px){.mobile-toggle{display:none!important;}.mobile-close{display:none!important;}.hub-sidebar.mobile-open{transform:translateX(0)!important;}}@media(max-width:1023px){.desktop-collapse{display:none!important;}}`}</style>
+      <style>{`@media(min-width:1024px){.sidebar-toggle{display:none!important;}.mobile-close{display:none!important;}.hub-sidebar.mobile-open{transform:translateX(0)!important;}}@media(max-width:1023px){.desktop-collapse{display:none!important;}}`}</style>
     </>
   );
 }
