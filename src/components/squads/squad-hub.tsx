@@ -184,10 +184,24 @@ export function SquadHub({
   const handleKick = async (userId: string) => { try { await fetch(`/api/squads/${squadId}/members/${userId}`, { method: "DELETE" }); setLocalMembers((prev) => prev.filter((m) => m.id !== userId)); toast.success("Member removed"); router.refresh(); } catch { toast.error("Failed"); } };
   const handlePromote = async (userId: string, role: string) => { try { await fetch(`/api/squads/${squadId}/members/${userId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role }) }); setLocalMembers((prev) => prev.map((m) => m.id === userId ? { ...m, role } : m)); toast.success("Role updated"); router.refresh(); } catch { toast.error("Failed"); } };
 
+  const handleDeleteSquad = async () => {
+    if (!confirm("DELETE this squad permanently? This action CANNOT be undone. All rooms, messages, and data will be lost.")) return;
+    setLoading(true);
+    try {
+      await fetch(`/api/squads/${squadId}`, { method: "DELETE" });
+      toast.success("Squad deleted");
+      router.push("/squads");
+    } catch { toast.error("Failed to delete squad"); setLoading(false); }
+  };
+
   const handleLeaveSquad = async () => {
-    if (isOwner) { if (!confirm("Owner leaving will DELETE this squad. Continue?")) return; try { await fetch(`/api/squads/${squadId}`, { method: "DELETE" }); toast.success("Squad deleted"); router.push("/squads"); } catch { toast.error("Failed"); } return; }
     if (!confirm("Leave this squad?")) return;
-    try { await fetch(`/api/squads/${squadId}/leave`, { method: "POST" }); toast.success("Left squad"); router.push("/squads"); } catch { toast.error("Failed"); }
+    setLoading(true);
+    try {
+      await fetch(`/api/squads/${squadId}/leave`, { method: "POST" });
+      toast.success("Left squad");
+      router.push("/squads");
+    } catch { toast.error("Failed to leave squad"); setLoading(false); }
   };
 
   const renderContent = () => {
@@ -253,8 +267,23 @@ export function SquadHub({
             <h3 className="modal-title"><Sparkles size={16} style={{ color: "#f59e0b", marginRight: "6px", display: "inline" }} />Create Room</h3>
             <input className="modal-input" placeholder="Room name..." value={newRoomName} onChange={(e) => setNewRoomName(e.target.value)} autoFocus />
             <div className="modal-type-row">
-              <div className={`modal-type-opt ${newRoomType === "CHAT" ? "sel" : ""}`} onClick={() => setNewRoomType("CHAT")}><MessageCircle size={24} style={{ color: newRoomType === "CHAT" ? "#f59e0b" : "#5a6478", marginBottom: "6px" }} /><div style={{ fontSize: "11px", fontWeight: 600, color: "#edeff2" }}>Chat Room</div></div>
-              <div className={`modal-type-opt ${newRoomType === "STUDY" ? "sel" : ""}`} onClick={() => setNewRoomType("STUDY")}><BookOpen size={24} style={{ color: newRoomType === "STUDY" ? "#f59e0b" : "#5a6478", marginBottom: "6px" }} /><div style={{ fontSize: "11px", fontWeight: 600, color: "#edeff2" }}>Study Room</div></div>
+              <div 
+                className={`modal-type-opt ${newRoomType === "CHAT" ? "sel" : ""}`} 
+                onClick={() => setNewRoomType("CHAT")}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <MessageCircle size={24} style={{ color: newRoomType === "CHAT" ? "#f59e0b" : "#5a6478", marginBottom: "6px" }} />
+                <div style={{ fontSize: "11px", fontWeight: 600, color: "#edeff2" }}>Chat Room</div>
+              </div>
+                    
+              <div 
+                className={`modal-type-opt ${newRoomType === "STUDY" ? "sel" : ""}`} 
+                onClick={() => setNewRoomType("STUDY")}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <BookOpen size={24} style={{ color: newRoomType === "STUDY" ? "#f59e0b" : "#5a6478", marginBottom: "6px" }} />
+                <div style={{ fontSize: "11px", fontWeight: 600, color: "#edeff2" }}>Study Room</div>
+              </div>
             </div>
             <div className="modal-actions"><button className="modal-btn modal-btn-cancel" onClick={() => setShowCreateModal(false)}>Cancel</button><button className="modal-btn modal-btn-create" onClick={handleCreateRoom} disabled={creating || !newRoomName.trim()}>{creating ? "Creating..." : "Create"}</button></div>
           </motion.div>
@@ -277,16 +306,50 @@ export function SquadHub({
               </button>
             ))}
             {canManage && <button className="hub-sb-item" onClick={() => { setShowCreateModal(true); setMobileOpen(false); }}><Plus size={19} className="hub-sb-icon" />{!collapsed && <span>Add Room</span>}</button>}
+            
             <p className="hub-sb-section-title" style={{ marginTop: "4px" }}>Squad</p>
-            <button className={`hub-sb-item ${activeView === "tasks" ? "active" : ""}`} onClick={() => { setActiveView("tasks"); setMobileOpen(false); }}><CheckSquare size={19} className="hub-sb-icon" />{!collapsed && <span>Squad Tasks</span>}</button>
-            <button className={`hub-sb-item ${activeView === "members" ? "active" : ""}`} onClick={() => { setActiveView("members"); setMobileOpen(false); }}><Users size={19} className="hub-sb-icon" />{!collapsed && <span>Members</span>}</button>
+            
+            <button className={`hub-sb-item ${activeView === "tasks" ? "active" : ""}`} onClick={() => { setActiveView("tasks"); setMobileOpen(false); }}>
+              <CheckSquare size={19} className="hub-sb-icon" />
+              {!collapsed && <span>Squad Tasks</span>}
+            </button>
+            
+            <button className={`hub-sb-item ${activeView === "members" ? "active" : ""}`} onClick={() => { setActiveView("members"); setMobileOpen(false); }}>
+              <Users size={19} className="hub-sb-icon" />
+              {!collapsed && <span>Members</span>}
+            </button>
+            
             <button className={`hub-sb-item ${activeView === "notifications" ? "active" : ""}`} onClick={() => { setActiveView("notifications"); setMobileOpen(false); }}>
-              <Bell size={19} className="hub-sb-icon" />{!collapsed && <span>Notifications</span>}{notifications.length > 0 && <span className="notif-badge">{notifications.length}</span>}
+              <Bell size={19} className="hub-sb-icon" />
+              {!collapsed && <span>Notifications</span>}
+              {notifications.length > 0 && <span className="notif-badge">{notifications.length}</span>}
             </button>
           </nav>
-          <div className="hub-sb-bottom"><button className="hub-sb-leave" onClick={handleLeaveSquad}><LogOut size={17} />{!collapsed && <span>Leave Squad</span>}</button></div>
+          
+          <div className="hub-sb-bottom">
+            {isOwner ? (
+              <>
+                <button 
+                  className="hub-sb-leave" 
+                  onClick={handleDeleteSquad}
+                  style={{ color: "#ef4444" }}
+                >
+                  <Trash2 size={17} />
+                  {!collapsed && <span>Delete Squad</span>}
+                </button>
+                <div style={{ height: "1px", background: "rgba(255,255,255,0.04)", margin: "4px 0" }} />
+              </>
+            ) : (
+              <button className="hub-sb-leave" onClick={handleLeaveSquad}>
+                <LogOut size={17} />
+                {!collapsed && <span>Leave Squad</span>}
+              </button>
+            )}
+          </div>
         </aside>
+        
         <main className={`hub-main ${collapsed ? 'sidebar-collapsed' : ''}`}>{renderContent()}</main>
+        
         <motion.button className="mobile-toggle" onClick={() => setMobileOpen(true)} whileTap={{ scale: 0.95 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}><ChevronRight size={20} /></motion.button>
       </div>
       <style>{`@media(min-width:1024px){.mobile-toggle{display:none!important;}.mobile-close{display:none!important;}.hub-sidebar.mobile-open{transform:translateX(0)!important;}}@media(max-width:1023px){.desktop-collapse{display:none!important;}}`}</style>

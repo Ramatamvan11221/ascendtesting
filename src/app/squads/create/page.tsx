@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Zap, Users, Target, Sparkles } from "lucide-react";
+import { ArrowLeft, Users, Sparkles } from "lucide-react";
 
 const STYLES = `
   .cs-wrap{min-height:100vh;background:radial-gradient(ellipse at 50% 30%,rgba(245,158,11,0.05),transparent 60%),#070c14;padding:20px 14px;display:flex;align-items:center;justify-content:center;}
@@ -33,7 +33,6 @@ const STYLES = `
   .icon-opt:hover{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.04);}
   .icon-opt input{display:none;}
   .icon-opt:has(input:checked){border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.08);box-shadow:0 0 16px rgba(245,158,11,0.06);}
-  .icon-opt.selected{border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.08);box-shadow:0 0 16px rgba(245,158,11,0.06);}
   .cat-grid{display:flex;flex-wrap:wrap;gap:5px;}
   @media(min-width:480px){.cat-grid{gap:6px;}}
   .cat-opt{padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.015);cursor:pointer;font-size:11px;color:#5a6478;transition:all 0.2s ease;font-family:'Inter',sans-serif;position:relative;}
@@ -41,12 +40,10 @@ const STYLES = `
   .cat-opt:hover{border-color:rgba(245,158,11,0.3);color:#9aa4b8;}
   .cat-opt input{display:none;}
   .cat-opt:has(input:checked){border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.08);color:#f59e0b;}
-  .cat-opt.selected{border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.08);color:#f59e0b;}
   .submit-btn{width:100%;padding:12px;border-radius:12px;margin-top:6px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#0a0a0a;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.3s ease;box-shadow:0 12px 30px -10px rgba(245,158,11,0.3);}
   @media(min-width:480px){.submit-btn{padding:14px;border-radius:14px;margin-top:8px;font-size:15px;}}
   .submit-btn:hover{transform:scale(1.02);box-shadow:0 16px 40px -12px rgba(245,158,11,0.4);}
-  .sr{opacity:0;transform:translateY(20px);transition:all 0.6s cubic-bezier(0.22,0.61,0.36,1);}
-  .sr.visible{opacity:1;transform:translateY(0);}
+  .submit-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
 `;
 
 const ICONS = ["🚀", "🎓", "💻", "🇯🇵", "🏆", "💰", "💪", "📖", "🎨", "✍️", "🎯", "🧠"];
@@ -58,18 +55,41 @@ export default async function CreateSquadPage() {
 
   async function createSquad(formData: FormData) {
     "use server";
-    const userSession = await getSession();
-    if (!userSession) redirect("/login");
+    
+    // Anti double submit — cek nama unik
     const name = formData.get("name") as string;
     if (!name) return;
+
+    const userSession = await getSession();
+    if (!userSession) redirect("/login");
+
+    // Cek apakah squad dengan nama ini sudah ada (prevent duplicate)
+    const existing = await prisma.squad.findFirst({
+      where: { name, ownerId: userSession.id },
+    });
+    if (existing) redirect(`/squads/${existing.id}`);
+
     const goal = formData.get("goal") as string;
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
     const icon = formData.get("icon") as string;
+
     const squad = await prisma.squad.create({
-      data: { name, goal: goal || "", description: description || "", category: category || "Umum", icon: icon || "🚀", ownerId: userSession.id, memberCount: 1 },
+      data: {
+        name,
+        goal: goal || "",
+        description: description || "",
+        category: category || "Umum",
+        icon: icon || "🚀",
+        ownerId: userSession.id,
+        memberCount: 1,
+      },
     });
-    await prisma.squadMember.create({ data: { squadId: squad.id, userId: userSession.id, role: "OWNER" } });
+
+    await prisma.squadMember.create({
+      data: { squadId: squad.id, userId: userSession.id, role: "OWNER" },
+    });
+
     redirect(`/squads/${squad.id}`);
   }
 
