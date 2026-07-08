@@ -181,16 +181,16 @@ const STYLES = `
   }
   .feature-card:hover { transform: translateY(-6px); box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6); }
   .feature-img { height: 180px; overflow: hidden; border-radius: 20px 20px 0 0; }
-  .feature-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4) saturate(0.3); transition: filter 0.6s ease; }
+  .feature-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(1) saturate(1); transition: filter 0.6s ease; }
   .feature-card:hover .feature-img img { filter: brightness(0.5) saturate(0.4); }
   .feature-body { padding: 20px; }
   .feature-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
 
   .testimonial-grid { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
   @media (min-width: 768px) { .testimonial-grid { grid-template-columns: 1fr 1fr; gap: 72px; } }
-  .testimonial-img { height: 280px; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,0.5); }
+  .testimonial-img { height: 280px; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,0.0); }
   @media (min-width: 768px) { .testimonial-img { height: 420px; } }
-  .testimonial-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.5) saturate(0.25); }
+  .testimonial-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(1) saturate(1); }
 
   .avatar-ring { display: flex; margin-top: 20px; }
   .avatar { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #141e2b; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
@@ -215,7 +215,7 @@ const STYLES = `
     transition: transform 0.3s ease;
     will-change: transform;
   }
-  .floating-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.45) saturate(0.3); }
+  .floating-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(1) saturate(1); }
   .floating-card .label {
     position: absolute; bottom: 0; left: 0; right: 0;
     padding: 10px 14px;
