@@ -36,6 +36,15 @@ const STYLES = `
   @media(min-width:480px){ .letter-from{font-size:13px;margin-top:18px;} }
   .letter-from-line{flex:1;height:1px;background:rgba(245,158,11,0.15);}
 
+  .quote-card{border-radius:16px;background:rgba(15,22,36,0.4);border:1px solid rgba(255,255,255,0.03);padding:16px 20px;margin-bottom:20px;position:relative;transition:all 0.3s ease;}
+  @media(min-width:480px){ .quote-card{padding:20px 28px;border-radius:20px;margin-bottom:28px;} }
+  .quote-card:hover{border-color:rgba(245,158,11,0.08);}
+  .quote-text{font-size:14px;color:#9aa4b8;font-style:italic;line-height:1.7;}
+  @media(min-width:480px){ .quote-text{font-size:15px;line-height:1.8;} }
+  .quote-author{font-size:12px;color:#fbbf24;font-weight:500;margin-top:8px;display:flex;align-items:center;gap:6px;}
+  @media(min-width:480px){ .quote-author{font-size:13px;margin-top:10px;} }
+  .quote-author-line{flex:1;height:1px;background:rgba(245,158,11,0.08);}
+
   .steps-card{border-radius:20px;background:rgba(15,22,36,0.6);border:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(20px);padding:24px 20px;transition:all 0.4s ease;}
   @media(min-width:480px){ .steps-card{padding:36px 40px;border-radius:24px;} }
   .steps-card:hover{border-color:rgba(245,158,11,0.15);}
@@ -96,7 +105,12 @@ const STYLES = `
   .sr-d1{transition-delay:0.08s;}.sr-d2{transition-delay:0.16s;}.sr-d3{transition-delay:0.24s;}.sr-d4{transition-delay:0.32s;}
 `;
 
-interface FutureSelfData { letter: string; steps: string[]; }
+interface FutureSelfData {
+  letter: string;
+  quote?: string;
+  author?: string;
+  steps: string[];
+}
 
 export function FutureSelfContent({ existingData, goal }: { existingData: FutureSelfData | null; goal: string }) {
   const [data, setData] = useState<FutureSelfData | null>(existingData);
@@ -157,10 +171,17 @@ export function FutureSelfContent({ existingData, goal }: { existingData: Future
                 <p className="letter-from"><span className="letter-from-line" />Dirimu dari masa depan<Sparkles size={13} style={{ color: "#fbbf24", marginLeft: "4px" }} /></p>
               </div>
 
+              {data.quote && (
+                <div className="quote-card sr sr-d1" style={{ transitionDelay: "0.04s" }}>
+                  <p className="quote-text">&quot;{data.quote}&quot;</p>
+                  <p className="quote-author"><span className="quote-author-line" />{data.author || "Anonymous"}</p>
+                </div>
+              )}
+
               <div className="steps-card sr sr-d2">
                 <div className="steps-header">
                   <div className="steps-icon-wrap"><TrendingUp size={18} style={{ color: "#fbbf24" }} /></div>
-                  <div><p className="steps-title">Jalan Menuju Goal-mu</p><p className="steps-subtitle">5 langkah konkret yang bisa kamu mulai hari ini</p></div>
+                  <div><p className="steps-title">Jalan Menuju Goal-mu</p><p className="steps-subtitle">{data.steps.length} langkah konkret yang bisa kamu mulai hari ini</p></div>
                 </div>
                 {data.steps?.map((step: string, i: number) => (
                   <div key={i} className="step-item sr" style={{ transitionDelay: `${0.1 * i}s` }}>
