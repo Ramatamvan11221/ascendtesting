@@ -20,32 +20,40 @@ export default async function TasksPage() {
     createdAt: t.createdAt.toISOString(),
   }));
 
-  // FIX: Gunakan timezone Indonesia (UTC+7)
+  // FIX: Gunakan timezone Indonesia (UTC+7) dengan cara yang benar
   const now = new Date();
-  // Convert ke UTC+7 (WIB)
-  const offset = 7 * 60; // 7 hours in minutes
-  const localDate = new Date(now.getTime() + offset * 60 * 1000);
-  const todayStr = localDate.toISOString().split("T")[0];
-  
-  console.log("Today string (fixed):", todayStr); // Harusnya 2026-06-16
+  // Konversi ke WIB (UTC+7) - pake method yang lebih akurat
+  const todayStr = new Date(now.getTime() + (7 * 60 * 60 * 1000))
+    .toISOString()
+    .split("T")[0];
 
+  console.log("Today WIB:", todayStr);
+  console.log("Total tasks:", formattedTasks.length);
+
+  // Group tasks by date (WIB)
   const tasksByDate: Record<string, typeof formattedTasks> = {};
   formattedTasks.forEach((task) => {
-    // Fix: Convert task date ke UTC+7 juga
     const taskDate = new Date(task.createdAt);
-    const taskLocalDate = new Date(taskDate.getTime() + offset * 60 * 1000);
-    const dateStr = taskLocalDate.toISOString().split("T")[0];
+    // Konversi ke WIB
+    const taskWib = new Date(taskDate.getTime() + (7 * 60 * 60 * 1000));
+    const dateStr = taskWib.toISOString().split("T")[0];
     
     if (!tasksByDate[dateStr]) tasksByDate[dateStr] = [];
     tasksByDate[dateStr].push(task);
   });
 
+  console.log("Dates with tasks:", Object.keys(tasksByDate).sort());
+
+  // Get all dates that have tasks
+  const allDatesWithTasks = Object.keys(tasksByDate).sort();
+
+  // Get last 7 days including today (WIB)
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
-    // Fix: Convert ke UTC+7
-    const dLocal = new Date(d.getTime() + offset * 60 * 1000);
-    const ds = dLocal.toISOString().split("T")[0];
+    // Konversi ke WIB
+    const dWib = new Date(d.getTime() + (7 * 60 * 60 * 1000));
+    const ds = dWib.toISOString().split("T")[0];
     
     const dayTasks = tasksByDate[ds] || [];
     const completed = dayTasks.filter((t) => t.isCompleted).length;
@@ -60,12 +68,37 @@ export default async function TasksPage() {
     };
   }).reverse();
 
+  // Add other dates that have tasks but not in last 7 days
+  const allDates = [...last7Days];
+  allDatesWithTasks.forEach((dateStr) => {
+    const exists = last7Days.some((d) => d.date === dateStr);
+    if (!exists) {
+      const d = new Date(dateStr + "T00:00:00");
+      const dayTasks = tasksByDate[dateStr] || [];
+      const completed = dayTasks.filter((t) => t.isCompleted).length;
+      const total = dayTasks.length;
+      allDates.push({
+        date: dateStr,
+        dayName: d.toLocaleDateString("id-ID", { weekday: "short", timeZone: "Asia/Jakarta" }),
+        dayNumber: d.getDate(),
+        completed,
+        total,
+        progress: total > 0 ? Math.round((completed / total) * 100) : 0,
+      });
+    }
+  });
+
+  // Sort by date (oldest to newest)
+  allDates.sort((a, b) => a.date.localeCompare(b.date));
+
+  console.log("Calendar dates:", allDates.map(d => ({ date: d.date, total: d.total })));
+
   return (
     <AppLayout>
       <DailyQuest
         key={todayStr}
         tasks={formattedTasks}
-        last7Days={last7Days}
+        calendarDays={allDates}
         todayStr={todayStr}
       />
     </AppLayout>

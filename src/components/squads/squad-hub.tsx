@@ -292,7 +292,7 @@ export function SquadHub({
             <div key={m.id} className="member-card">
               <div className="member-avatar">{m.name?.charAt(0) || "?"}</div>
               <div className="member-info">
-                <p className="member-name">{m.name}{m.role === "OWNER" && <span className="member-role owner"><Crown size={9} />Owner</span>}{m.role === "MODERATOR" && <span className="member-role mod"><Shield size={9} />Mod</span>}</p>
+                <p className="member-name">{m.name}{m.role === "OWNER" && <span className="member-role owner">Owner</span>}{m.role === "MODERATOR" && <span className="member-role mod">Mod</span>}</p>
                 {m.currentGoal && <p className="member-goal">{m.currentGoal}</p>}
               </div>
               {canManage && m.id !== currentUserId && (

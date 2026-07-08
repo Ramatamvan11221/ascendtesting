@@ -15,8 +15,9 @@ const STYLES = `
   .dq-title-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
   .dq-title{font-size:24px;font-weight:700;color:#edeff2;letter-spacing:-0.02em;display:flex;align-items:center;gap:10px;}
   @media(min-width:480px){.dq-title{font-size:30px;}}
-  .dq-date{font-size:11px;color:#5a6478;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);white-space:nowrap;}
+  .dq-date{font-size:11px;color:#5a6478;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);white-space:nowrap;cursor:pointer;transition:all 0.3s ease;}
   @media(min-width:480px){.dq-date{font-size:13px;padding:6px 14px;}}
+  .dq-date:hover{border-color:rgba(245,158,11,0.2);background:rgba(245,158,11,0.04);}
   .dq-subtitle{font-size:13px;color:#5a6478;margin-top:4px;}
   .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:18px;}
   @media(min-width:480px){.stats-row{gap:12px;margin-bottom:24px;}}
@@ -29,19 +30,28 @@ const STYLES = `
   @media(min-width:480px){.stat-value{font-size:26px;}}
   .stat-label{font-size:9px;color:#5a6478;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
   @media(min-width:480px){.stat-label{font-size:10px;margin-top:4px;}}
-  .calendar-strip{display:flex;gap:4px;margin-bottom:18px;overflow-x:auto;padding-bottom:6px;}
-  @media(min-width:480px){.calendar-strip{gap:6px;margin-bottom:24px;}}
-  .cal-day{min-width:46px;padding:8px 4px;border-radius:10px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);background:rgba(15,22,36,0.4);transition:all 0.25s ease;flex-shrink:0;}
-  @media(min-width:480px){.cal-day{min-width:54px;padding:10px 6px;border-radius:13px;}}
-  .cal-day:hover{border-color:rgba(245,158,11,0.2);background:rgba(15,22,36,0.6);}
+  
+  .calendar-wrap{display:flex;gap:4px;margin-bottom:18px;overflow-x:auto;padding-bottom:6px;align-items:stretch;flex-wrap:nowrap;}
+  @media(min-width:480px){.calendar-wrap{gap:6px;margin-bottom:24px;}}
+  .cal-day{min-width:46px;padding:8px 4px 6px;border-radius:10px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);background:rgba(15,22,36,0.4);transition:all 0.25s ease;flex-shrink:0;position:relative;}
+  @media(min-width:480px){.cal-day{min-width:54px;padding:10px 6px 8px;border-radius:13px;}}
+  .cal-day:hover{border-color:rgba(245,158,11,0.3);background:rgba(15,22,36,0.6);transform:translateY(-2px);}
   .cal-day.today{border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.05);}
+  .cal-day.selected{border-color:#f59e0b;background:rgba(245,158,11,0.08);box-shadow:0 0 20px rgba(245,158,11,0.05);}
   .cal-day-name{font-size:9px;color:#5a6478;text-transform:uppercase;letter-spacing:0.04em;font-weight:600;}
   @media(min-width:480px){.cal-day-name{font-size:10px;}}
   .cal-day-num{font-size:14px;font-weight:700;color:#edeff2;margin:2px 0;}
   @media(min-width:480px){.cal-day-num{font-size:17px;margin:3px 0;}}
   .cal-day.today .cal-day-num{color:#f59e0b;}
-  .cal-dot-row{display:flex;gap:2px;justify-content:center;margin-top:2px;}
-  .cal-dot{width:4px;height:4px;border-radius:50%;}
+  .cal-day.selected .cal-day-num{color:#f59e0b;}
+  
+  /* Progress bar di bawah tanggal - GARIS */
+  .cal-progress-wrap{width:100%;height:3px;border-radius:2px;background:rgba(255,255,255,0.06);margin-top:4px;overflow:hidden;}
+  @media(min-width:480px){.cal-progress-wrap{height:4px;margin-top:5px;}}
+  .cal-progress-fill{height:100%;border-radius:2px;transition:width 0.4s ease;background:linear-gradient(90deg,#f59e0b,#f97316);}
+  .cal-progress-fill.complete{background:linear-gradient(90deg,#10b981,#34d399);}
+  .cal-progress-fill.partial{background:linear-gradient(90deg,#f59e0b,#f97316);}
+
   .progress-section{margin-bottom:18px;padding:16px 18px;border-radius:14px;background:rgba(15,22,36,0.5);border:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(12px);}
   @media(min-width:480px){.progress-section{margin-bottom:24px;padding:20px 24px;border-radius:18px;}}
   .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
@@ -80,8 +90,7 @@ const STYLES = `
   .task-text.done{color:#5a6478;text-decoration:line-through;}
   .task-time{font-size:9px;color:#4a5568;flex-shrink:0;}
   @media(min-width:480px){.task-time{font-size:10px;}}
-  .task-del{opacity:1;background:none;border:none;color:#ef4444;cursor:pointer;padding:4px;border-radius:6px;transition:all 0.2s;}
-  .task-del:hover{background:rgba(239,68,68,0.1);}
+  .task-del{background:none;border:none;color:#5a6478;cursor:pointer;padding:4px;border-radius:6px;transition:all 0.2s;}
   .task-del:hover{color:#ef4444;background:rgba(239,68,68,0.06);}
   .empty-tasks{text-align:center;padding:40px 16px;}
   @media(min-width:480px){.empty-tasks{padding:48px 20px;}}
@@ -98,15 +107,38 @@ const STYLES = `
 interface Task { id: string; title: string; isCompleted: boolean; createdAt: string; }
 interface DayData { date: string; dayName: string; dayNumber: number; completed: number; total: number; progress: number; }
 
-export function DailyQuest({ tasks, last7Days, todayStr }: { tasks: Task[]; last7Days: DayData[]; todayStr: string; }) {
+// Helper: Convert UTC date to WIB date string
+const toWIBDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return new Date(date.getTime() + (7 * 60 * 60 * 1000)).toISOString().split("T")[0];
+};
+
+// Helper: Get today's date in WIB
+const getTodayWIB = () => {
+  const now = new Date();
+  return new Date(now.getTime() + (7 * 60 * 60 * 1000)).toISOString().split("T")[0];
+};
+
+export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; calendarDays: DayData[]; todayStr: string; }) {
   const router = useRouter();
-  const [allTasks, setAllTasks] = useState<Task[]>(tasks);
+  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
   const [title, setTitle] = useState("");
   const [adding, setAdding] = useState(false);
+  
+  const effectiveToday = todayStr || getTodayWIB();
+  const [selectedDate, setSelectedDate] = useState(effectiveToday);
 
-  useEffect(() => { setAllTasks(tasks); }, [tasks]);
+  useEffect(() => {
+    const newToday = todayStr || getTodayWIB();
+    if (selectedDate === effectiveToday || !selectedDate) {
+      setSelectedDate(newToday);
+    }
+  }, [todayStr]);
 
-  // Scroll reveal
+  useEffect(() => {
+    setLocalTasks(tasks);
+  }, [tasks]);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => { entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }); },
@@ -114,49 +146,101 @@ export function DailyQuest({ tasks, last7Days, todayStr }: { tasks: Task[]; last
     );
     document.querySelectorAll(".sr").forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [allTasks]);
+  }, [localTasks]);
 
-  const localTasks = allTasks.filter((t) => {
+  const filteredTasks = localTasks.filter((t) => {
     if (!t.createdAt) return false;
-    return new Date(t.createdAt).toISOString().split("T")[0] === todayStr;
+    const taskWIBDate = toWIBDate(t.createdAt);
+    return taskWIBDate === selectedDate;
   });
 
-  const todayCompleted = localTasks.filter((t) => t.isCompleted).length;
-  const todayTotal = localTasks.length;
+  const todayCompleted = filteredTasks.filter((t) => t.isCompleted).length;
+  const todayTotal = filteredTasks.length;
   const todayProgress = todayTotal > 0 ? Math.round((todayCompleted / todayTotal) * 100) : 0;
 
   const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
-  const weeklyTasks = allTasks.filter((t) => new Date(t.createdAt) >= weekAgo);
+  const weeklyTasks = localTasks.filter((t) => new Date(t.createdAt) >= weekAgo);
   const weeklyCompleted = weeklyTasks.filter((t) => t.isCompleted).length;
   const weeklyTotal = weeklyTasks.length;
   const weeklyProgress = weeklyTotal > 0 ? Math.round((weeklyCompleted / weeklyTotal) * 100) : 0;
+
+  const isToday = selectedDate === effectiveToday;
+
+  const getDayName = (dateStr: string) => {
+    if (!dateStr) return "Today";
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  };
 
   const handleAdd = async () => {
     if (!title.trim() || adding) return;
     setAdding(true);
     try {
-      const res = await fetch("/api/tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: title.trim() }) });
+      const res = await fetch("/api/tasks", { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify({ title: title.trim() }) 
+      });
       const data = await res.json();
-      if (!res.ok || !data.task) throw new Error("Failed");
-      const newTask: Task = { id: data.task.id, title: data.task.title, isCompleted: false, createdAt: data.task.createdAt || new Date().toISOString() };
-      setAllTasks((prev) => [newTask, ...prev]);
+      if (!res.ok || !data.task) throw new Error(data.error || "Failed");
+      
+      const newTask: Task = { 
+        id: data.task.id, 
+        title: data.task.title, 
+        isCompleted: false, 
+        createdAt: new Date(Date.now() + (7 * 60 * 60 * 1000)).toISOString()
+      };
+      
+      setLocalTasks((prev) => [newTask, ...prev]);
       setTitle("");
-      toast.success("Task added!");
+      
+      if (!isToday) {
+        setSelectedDate(effectiveToday);
+      }
+      
+      toast.success("Task added! 🎯");
       router.refresh();
-    } catch { toast.error("Failed"); }
+    } catch (error) {
+      console.error("Add task error:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to add task");
+    }
     setAdding(false);
   };
 
   const handleToggle = async (taskId: string) => {
-    setAllTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t));
-    try { await fetch(`/api/tasks/${taskId}/toggle`, { method: "POST" }); router.refresh(); }
-    catch { setAllTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t)); toast.error("Failed"); }
+    setLocalTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t));
+    try { 
+      await fetch(`/api/tasks/${taskId}/toggle`, { method: "POST" }); 
+      router.refresh();
+    } catch { 
+      setLocalTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t)); 
+      toast.error("Failed to toggle task");
+    }
   };
 
   const handleDelete = async (taskId: string) => {
-    setAllTasks((prev) => prev.filter((t) => t.id !== taskId));
-    try { await fetch(`/api/tasks/${taskId}`, { method: "DELETE" }); router.refresh(); }
-    catch { toast.error("Failed"); router.refresh(); }
+    setLocalTasks((prev) => prev.filter((t) => t.id !== taskId));
+    try { 
+      await fetch(`/api/tasks/${taskId}`, { method: "DELETE" }); 
+      router.refresh();
+    } catch { 
+      toast.error("Failed to delete task"); 
+      router.refresh();
+    }
+  };
+
+  const handleDateClick = (date: string) => {
+    setSelectedDate(date);
+  };
+
+  const getDateProgress = (date: string) => {
+    const dayTasks = localTasks.filter((t) => {
+      if (!t.createdAt) return false;
+      return toWIBDate(t.createdAt) === date;
+    });
+    if (dayTasks.length === 0) return 0;
+    const completed = dayTasks.filter((t) => t.isCompleted).length;
+    return Math.round((completed / dayTasks.length) * 100);
   };
 
   return (
@@ -167,14 +251,17 @@ export function DailyQuest({ tasks, last7Days, todayStr }: { tasks: Task[]; last
           <div className="dq-header sr">
             <div className="dq-title-row">
               <h1 className="dq-title"><Target size={24} style={{ color: "#f59e0b" }} />Daily Quest</h1>
-              <span className="dq-date"><Calendar size={12} style={{ marginRight: "5px", display: "inline" }} />{new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
+              <span className="dq-date" onClick={() => setSelectedDate(effectiveToday)}>
+                <Calendar size={12} style={{ marginRight: "5px", display: "inline" }} />
+                {getDayName(selectedDate)}
+              </span>
             </div>
             <p className="dq-subtitle">Small steps every day lead to big results.</p>
           </div>
 
           <div className="stats-row sr sr-d1">
             {[
-              { icon: Target, color: "#f59e0b", value: `${todayProgress}%`, label: "Today" },
+              { icon: Target, color: "#f59e0b", value: `${todayProgress}%`, label: "Progress" },
               { icon: TrendingUp, color: "#10b981", value: `${weeklyProgress}%`, label: "This Week" },
               { icon: Check, color: "#a78bfa", value: weeklyCompleted, label: "Done" },
               { icon: Flame, color: "#f97316", value: weeklyTotal, label: "Total" },
@@ -187,56 +274,89 @@ export function DailyQuest({ tasks, last7Days, todayStr }: { tasks: Task[]; last
             ))}
           </div>
 
-          <div className="calendar-strip sr sr-d2">
-            {last7Days.map((day) => (
-              <div key={day.date} className={`cal-day ${day.date === todayStr ? "today" : ""}`}>
-                <p className="cal-day-name">{day.dayName}</p>
-                <p className="cal-day-num">{day.dayNumber}</p>
-                <div className="cal-dot-row">
-                  <span className="cal-dot" style={{ background: day.total > 0 ? (day.progress === 100 ? "#10b981" : "#f59e0b") : "rgba(255,255,255,0.06)" }} />
-                  {day.total > 3 && <span className="cal-dot" style={{ background: day.progress === 100 ? "#10b981" : "rgba(245,158,11,0.4)" }} />}
-                  {day.total > 6 && <span className="cal-dot" style={{ background: day.progress === 100 ? "#10b981" : "rgba(245,158,11,0.2)" }} />}
+          <div className="calendar-wrap sr sr-d2">
+            {calendarDays.map((day) => {
+              const progress = getDateProgress(day.date);
+              const isComplete = progress === 100 && day.total > 0;
+              const hasTask = day.total > 0;
+              
+              return (
+                <div 
+                  key={day.date} 
+                  className={`cal-day ${day.date === effectiveToday ? "today" : ""} ${day.date === selectedDate ? "selected" : ""}`}
+                  onClick={() => handleDateClick(day.date)}
+                >
+                  <p className="cal-day-name">{day.dayName}</p>
+                  <p className="cal-day-num">{day.dayNumber}</p>
+                  
+                  {/* Progress bar - GARIS */}
+                  <div className="cal-progress-wrap">
+                    <div 
+                      className={`cal-progress-fill ${isComplete ? "complete" : hasTask ? "partial" : ""}`}
+                      style={{ 
+                        width: hasTask ? `${progress}%` : '0%',
+                        opacity: hasTask ? 1 : 0.2
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="progress-section sr sr-d3">
             <div className="progress-header">
-              <p className="progress-title"><Zap size={14} style={{ color: "#f59e0b" }} />Today&apos;s Progress</p>
+              <p className="progress-title"><Zap size={14} style={{ color: "#f59e0b" }} />
+                {isToday ? "Today's Progress" : `Progress for ${getDayName(selectedDate)}`}
+              </p>
               <p className="progress-pct">{todayProgress}%</p>
             </div>
             <div className="progress-bar"><div className="progress-fill" style={{ width: `${todayProgress}%` }} /></div>
             {todayProgress === 100 && todayTotal > 0 && (
               <div className="progress-celebration">
                 <p style={{ color: "#10b981", fontSize: "12px", fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
-                  <Sparkles size={14} />All done for today! Amazing work!<Sparkles size={14} />
+                  <Sparkles size={14} />All done! Amazing work!<Sparkles size={14} />
                 </p>
               </div>
             )}
           </div>
 
           <div className="add-row sr sr-d4">
-            <input className="add-input" placeholder="What do you want to achieve today?" value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
-            <button className="add-btn" onClick={handleAdd} disabled={adding || !title.trim()}>
-              {adding ? <span className="spinner" /> : <Plus size={14} />}Add Task
+            <input 
+              className="add-input" 
+              placeholder="What do you want to achieve today?" 
+              value={title} 
+              onChange={(e) => setTitle(e.target.value)} 
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()} 
+            />
+            <button 
+              className="add-btn" 
+              onClick={handleAdd} 
+              disabled={adding || !title.trim()}
+            >
+              {adding ? <span className="spinner" /> : <Plus size={14} />}
+              {adding ? "Adding..." : "Add Task"}
             </button>
           </div>
 
-          {localTasks.length === 0 ? (
+          {filteredTasks.length === 0 ? (
             <div className="empty-tasks sr" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
               <Calendar size={40} style={{ opacity: 0.15, marginBottom: "10px" }} />
-              <p style={{ fontSize: "14px", color: "#5a6478" }}>No tasks for today. Start fresh!</p>
+              <p style={{ fontSize: "14px", color: "#5a6478" }}>
+                {isToday ? "No tasks for today. Start fresh!" : `No tasks for ${getDayName(selectedDate)}`}
+              </p>
             </div>         
           ) : (
             <div className="task-list">
-              {localTasks.map((task) => (
+              {filteredTasks.map((task) => (
                 <div key={task.id} className="task-item">
                   <div className={`task-check ${task.isCompleted ? "done" : ""}`} onClick={() => handleToggle(task.id)}>
                     {task.isCompleted && <Check size={11} style={{ color: "#fff" }} />}
                   </div>
                   <span className={`task-text ${task.isCompleted ? "done" : ""}`}>{task.title}</span>
-                  <span className="task-time"><Clock size={9} style={{ marginRight: "3px", display: "inline" }} />{new Date(task.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+                  <span className="task-time"><Clock size={9} style={{ marginRight: "3px", display: "inline" }} />
+                    {new Date(task.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}
+                  </span>
                   <button className="task-del" onClick={() => handleDelete(task.id)}><Trash2 size={13} /></button>
                 </div>
               ))}
