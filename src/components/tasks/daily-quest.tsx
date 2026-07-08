@@ -107,16 +107,36 @@ const STYLES = `
 interface Task { id: string; title: string; isCompleted: boolean; createdAt: string; }
 interface DayData { date: string; dayName: string; dayNumber: number; completed: number; total: number; progress: number; }
 
-// Helper: Convert UTC date to WIB date string (CONSISTENT)
+// Helper: Convert UTC date to WIB date string pake Intl (CONSISTENT di server & client)
 function toWIBDate(dateStr: string): string {
   const date = new Date(dateStr);
-  return new Date(date.getTime() + (7 * 60 * 60 * 1000)).toISOString().split("T")[0];
+  const formatter = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const parts = formatter.formatToParts(date);
+  const year = parts.find(p => p.type === 'year')?.value || '';
+  const month = parts.find(p => p.type === 'month')?.value || '';
+  const day = parts.find(p => p.type === 'day')?.value || '';
+  return `${year}-${month}-${day}`;
 }
 
-// Helper: Get today's date in WIB (CONSISTENT)
+// Helper: Get today's date in WIB pake Intl (CONSISTENT di server & client)
 function getTodayWIB(): string {
   const now = new Date();
-  return new Date(now.getTime() + (7 * 60 * 60 * 1000)).toISOString().split("T")[0];
+  const formatter = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const parts = formatter.formatToParts(now);
+  const year = parts.find(p => p.type === 'year')?.value || '';
+  const month = parts.find(p => p.type === 'month')?.value || '';
+  const day = parts.find(p => p.type === 'day')?.value || '';
+  return `${year}-${month}-${day}`;
 }
 
 export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; calendarDays: DayData[]; todayStr: string; }) {
@@ -125,25 +145,20 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
   const [title, setTitle] = useState("");
   const [adding, setAdding] = useState(false);
   
-  // Use todayStr from props (already in WIB)
   const effectiveToday = todayStr || getTodayWIB();
   const [selectedDate, setSelectedDate] = useState(effectiveToday);
 
-  // Update selectedDate when todayStr changes
   useEffect(() => {
     const newToday = todayStr || getTodayWIB();
-    // Only update if currently selected is the old today
     if (selectedDate === effectiveToday || !selectedDate) {
       setSelectedDate(newToday);
     }
   }, [todayStr]);
 
-  // Update localTasks when props tasks change
   useEffect(() => {
     setLocalTasks(tasks);
   }, [tasks]);
 
-  // Scroll reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => { entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }); },
@@ -173,8 +188,9 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
 
   const getDayName = (dateStr: string) => {
     if (!dateStr) return "Today";
-    const d = new Date(dateStr + "T00:00:00");
-    return d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const d = new Date(year, month - 1, day);
+    return d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" });
   };
 
   const handleAdd = async () => {
@@ -189,18 +205,20 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
       const data = await res.json();
       if (!res.ok || !data.task) throw new Error(data.error || "Failed");
       
-      // Create task with WIB date (client-side)
+      // Get current WIB time as ISO string (client-side)
+      const now = new Date();
+      const wibTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+      
       const newTask: Task = { 
         id: data.task.id, 
         title: data.task.title, 
         isCompleted: false, 
-        createdAt: new Date(Date.now() + (7 * 60 * 60 * 1000)).toISOString()
+        createdAt: wibTime.toISOString()
       };
       
       setLocalTasks((prev) => [newTask, ...prev]);
       setTitle("");
       
-      // If selected date is not today, switch to today
       if (!isToday) {
         setSelectedDate(effectiveToday);
       }
@@ -240,7 +258,6 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
     setSelectedDate(date);
   };
 
-  // Get progress for a specific date
   const getDateProgress = (date: string) => {
     const dayTasks = localTasks.filter((t) => {
       if (!t.createdAt) return false;
@@ -297,7 +314,6 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
                   <p className="cal-day-name">{day.dayName}</p>
                   <p className="cal-day-num">{day.dayNumber}</p>
                   
-                  {/* Progress bar - GARIS */}
                   <div className="cal-progress-wrap">
                     <div 
                       className={`cal-progress-fill ${isComplete ? "complete" : hasTask ? "partial" : ""}`}
