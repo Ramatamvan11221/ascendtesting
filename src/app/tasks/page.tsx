@@ -4,6 +4,21 @@ import { redirect } from "next/navigation";
 import { AppLayout } from "@/components/layout/app-layout";
 import { DailyQuest } from "@/components/tasks/daily-quest";
 
+// Helper: Get today's date in WIB (UTC+7)
+function getTodayWIB(): string {
+  const now = new Date();
+  // Tambah 7 jam (UTC+7)
+  const wibTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+  return wibTime.toISOString().split("T")[0];
+}
+
+// Helper: Convert any date to WIB date string
+function toWIBDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const wibTime = new Date(date.getTime() + (7 * 60 * 60 * 1000));
+  return wibTime.toISOString().split("T")[0];
+}
+
 export default async function TasksPage() {
   const session = await getSession();
   if (!session) redirect("/login");
@@ -20,12 +35,8 @@ export default async function TasksPage() {
     createdAt: t.createdAt.toISOString(),
   }));
 
-  // FIX: Gunakan timezone Indonesia (UTC+7) dengan cara yang benar
-  const now = new Date();
-  // Konversi ke WIB (UTC+7) - pake method yang lebih akurat
-  const todayStr = new Date(now.getTime() + (7 * 60 * 60 * 1000))
-    .toISOString()
-    .split("T")[0];
+  // Get today in WIB
+  const todayStr = getTodayWIB();
 
   console.log("Today WIB:", todayStr);
   console.log("Total tasks:", formattedTasks.length);
@@ -33,11 +44,7 @@ export default async function TasksPage() {
   // Group tasks by date (WIB)
   const tasksByDate: Record<string, typeof formattedTasks> = {};
   formattedTasks.forEach((task) => {
-    const taskDate = new Date(task.createdAt);
-    // Konversi ke WIB
-    const taskWib = new Date(taskDate.getTime() + (7 * 60 * 60 * 1000));
-    const dateStr = taskWib.toISOString().split("T")[0];
-    
+    const dateStr = toWIBDate(task.createdAt);
     if (!tasksByDate[dateStr]) tasksByDate[dateStr] = [];
     tasksByDate[dateStr].push(task);
   });
@@ -49,7 +56,7 @@ export default async function TasksPage() {
 
   // Get last 7 days including today (WIB)
   const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(now);
+    const d = new Date();
     d.setDate(d.getDate() - i);
     // Konversi ke WIB
     const dWib = new Date(d.getTime() + (7 * 60 * 60 * 1000));

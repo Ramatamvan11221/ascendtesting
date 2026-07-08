@@ -107,17 +107,17 @@ const STYLES = `
 interface Task { id: string; title: string; isCompleted: boolean; createdAt: string; }
 interface DayData { date: string; dayName: string; dayNumber: number; completed: number; total: number; progress: number; }
 
-// Helper: Convert UTC date to WIB date string
-const toWIBDate = (dateStr: string) => {
+// Helper: Convert UTC date to WIB date string (CONSISTENT)
+function toWIBDate(dateStr: string): string {
   const date = new Date(dateStr);
   return new Date(date.getTime() + (7 * 60 * 60 * 1000)).toISOString().split("T")[0];
-};
+}
 
-// Helper: Get today's date in WIB
-const getTodayWIB = () => {
+// Helper: Get today's date in WIB (CONSISTENT)
+function getTodayWIB(): string {
   const now = new Date();
   return new Date(now.getTime() + (7 * 60 * 60 * 1000)).toISOString().split("T")[0];
-};
+}
 
 export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; calendarDays: DayData[]; todayStr: string; }) {
   const router = useRouter();
@@ -125,20 +125,25 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
   const [title, setTitle] = useState("");
   const [adding, setAdding] = useState(false);
   
+  // Use todayStr from props (already in WIB)
   const effectiveToday = todayStr || getTodayWIB();
   const [selectedDate, setSelectedDate] = useState(effectiveToday);
 
+  // Update selectedDate when todayStr changes
   useEffect(() => {
     const newToday = todayStr || getTodayWIB();
+    // Only update if currently selected is the old today
     if (selectedDate === effectiveToday || !selectedDate) {
       setSelectedDate(newToday);
     }
   }, [todayStr]);
 
+  // Update localTasks when props tasks change
   useEffect(() => {
     setLocalTasks(tasks);
   }, [tasks]);
 
+  // Scroll reveal
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => { entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }); },
@@ -148,10 +153,10 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
     return () => observer.disconnect();
   }, [localTasks]);
 
+  // Filter tasks based on selected date (use WIB conversion)
   const filteredTasks = localTasks.filter((t) => {
     if (!t.createdAt) return false;
-    const taskWIBDate = toWIBDate(t.createdAt);
-    return taskWIBDate === selectedDate;
+    return toWIBDate(t.createdAt) === selectedDate;
   });
 
   const todayCompleted = filteredTasks.filter((t) => t.isCompleted).length;
@@ -184,6 +189,7 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
       const data = await res.json();
       if (!res.ok || !data.task) throw new Error(data.error || "Failed");
       
+      // Create task with WIB date (client-side)
       const newTask: Task = { 
         id: data.task.id, 
         title: data.task.title, 
@@ -194,6 +200,7 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
       setLocalTasks((prev) => [newTask, ...prev]);
       setTitle("");
       
+      // If selected date is not today, switch to today
       if (!isToday) {
         setSelectedDate(effectiveToday);
       }
@@ -233,6 +240,7 @@ export function DailyQuest({ tasks, calendarDays, todayStr }: { tasks: Task[]; c
     setSelectedDate(date);
   };
 
+  // Get progress for a specific date
   const getDateProgress = (date: string) => {
     const dayTasks = localTasks.filter((t) => {
       if (!t.createdAt) return false;
