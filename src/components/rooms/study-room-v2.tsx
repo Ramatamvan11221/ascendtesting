@@ -20,9 +20,11 @@ const STYLES = `
   .join-btn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;background:linear-gradient(135deg,#10b981,#059669);color:#fff;display:flex;align-items:center;gap:6px;box-shadow:0 6px 18px -6px rgba(16,185,129,0.25);transition:all 0.3s ease;white-space:nowrap;}
   @media(min-width:480px){.join-btn{padding:9px 20px;border-radius:12px;font-size:13px;}}
   .join-btn:hover{transform:scale(1.03);}
+  .join-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
   .leave-btn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid rgba(239,68,68,0.2);cursor:pointer;font-family:'Inter',sans-serif;background:rgba(239,68,68,0.08);color:#ef4444;display:flex;align-items:center;gap:6px;transition:all 0.3s ease;white-space:nowrap;}
   @media(min-width:480px){.leave-btn{padding:9px 20px;border-radius:12px;font-size:13px;}}
   .leave-btn:hover{background:rgba(239,68,68,0.16);}
+  .leave-btn:disabled{opacity:0.5;cursor:not-allowed;}
 
   .mode-selector{display:flex;gap:4px;}
   @media(min-width:480px){.mode-selector{gap:6px;}}
@@ -97,6 +99,8 @@ export function StudyRoom({ roomId, roomName, currentUserId, currentUserName, is
   roomId: string; roomName: string; currentUserId: string; currentUserName: string; isOwner: boolean; squadId: string;
 }) {
   const [joined, setJoined] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [mode, setMode] = useState("FOCUS");
   const [note, setNote] = useState("");
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -104,44 +108,131 @@ export function StudyRoom({ roomId, roomName, currentUserId, currentUserName, is
   const [timer, setTimer] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const perPage = 8;
+  const joinInProgress = useRef(false);
 
   useEffect(() => {
     fetch(`/api/rooms/${roomId}/study`).then((r) => r.json()).then((d) => {
-      setParticipants(Array.isArray(d) ? d : []);
-      const isIn = Array.isArray(d) && d.some((p: Participant) => p.userId === currentUserId);
-      if (isIn) { setJoined(true); const me = d.find((p: Participant) => p.userId === currentUserId); if (me) { setMode(me.mode || "FOCUS"); setNote(me.note || ""); setTimer(me.duration || 0); } }
+      const data = Array.isArray(d) ? d : [];
+      setParticipants(data);
+      const isIn = data.some((p: Participant) => p.userId === currentUserId);
+      if (isIn) { 
+        setJoined(true); 
+        const me = data.find((p: Participant) => p.userId === currentUserId); 
+        if (me) { setMode(me.mode || "FOCUS"); setNote(me.note || ""); setTimer(me.duration || 0); } 
+      }
     }).catch(() => {});
   }, [roomId, currentUserId]);
 
   useEffect(() => {
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!, authEndpoint: "/api/pusher/auth" });
     const ch = pusher.subscribe(`study-${roomId}`);
-    ch.bind("user-joined", (p: Participant) => setParticipants((prev) => [...prev.filter((x) => x.userId !== p.userId), p]));
-    ch.bind("user-left", (data: { userId: string }) => setParticipants((prev) => prev.filter((x) => x.userId !== data.userId)));
-    ch.bind("mode-changed", (data: { userId: string; mode: string }) => { setParticipants((prev) => prev.map((p) => p.userId === data.userId ? { ...p, mode: data.mode } : p)); if (data.userId === currentUserId) setMode(data.mode); });
-    ch.bind("note-changed", (data: { userId: string; note: string }) => setParticipants((prev) => prev.map((p) => p.userId === data.userId ? { ...p, note: data.note } : p)));
+    
+    ch.bind("user-joined", (p: Participant) => {
+      setParticipants((prev) => {
+        // Prevent duplicate: if user already exists, update instead of add
+        const exists = prev.some((x) => x.userId === p.userId);
+        if (exists) {
+          return prev.map((x) => x.userId === p.userId ? p : x);
+        }
+        return [...prev, p];
+      });
+    });
+    
+    ch.bind("user-left", (data: { userId: string }) => {
+      setParticipants((prev) => prev.filter((x) => x.userId !== data.userId));
+    });
+    
+    ch.bind("mode-changed", (data: { userId: string; mode: string }) => {
+      setParticipants((prev) => prev.map((p) => p.userId === data.userId ? { ...p, mode: data.mode } : p));
+      if (data.userId === currentUserId) setMode(data.mode);
+    });
+    
+    ch.bind("note-changed", (data: { userId: string; note: string }) => {
+      setParticipants((prev) => prev.map((p) => p.userId === data.userId ? { ...p, note: data.note } : p));
+    });
+    
     return () => { ch.unbind_all(); ch.unsubscribe(); pusher.disconnect(); };
   }, [roomId, currentUserId]);
 
-  useEffect(() => { if (joined) { timerRef.current = setInterval(() => setTimer((t) => t + 1), 1000); } return () => { if (timerRef.current) clearInterval(timerRef.current); }; }, [joined]);
+  useEffect(() => { 
+    if (joined) { 
+      timerRef.current = setInterval(() => setTimer((t) => t + 1), 1000); 
+    } 
+    return () => { 
+      if (timerRef.current) clearInterval(timerRef.current); 
+    }; 
+  }, [joined]);
 
   const joinStudy = async () => {
-    try { await fetch(`/api/rooms/${roomId}/study`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "start" }) }); setJoined(true); setTimer(0); toast.success("Joined study room!"); }
-    catch { toast.error("Failed to join"); }
+    // Prevent multiple clicks
+    if (joining || joined || joinInProgress.current) return;
+    
+    joinInProgress.current = true;
+    setJoining(true);
+    
+    try {
+      const res = await fetch(`/api/rooms/${roomId}/study`, { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify({ action: "start" }) 
+      });
+      
+      if (!res.ok) throw new Error("Failed to join");
+      
+      setJoined(true);
+      setTimer(0);
+      toast.success("Joined study room!");
+    } catch {
+      toast.error("Failed to join");
+    } finally {
+      setJoining(false);
+      joinInProgress.current = false;
+    }
   };
 
   const leaveStudy = async () => {
-    try { await fetch(`/api/rooms/${roomId}/study`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "stop" }) }); setJoined(false); if (timerRef.current) clearInterval(timerRef.current); toast.success(`Study session ended! ${formatDuration(timer)}`); }
-    catch { toast.error("Failed to leave"); }
+    if (leaving || !joined) return;
+    
+    setLeaving(true);
+    
+    try {
+      const res = await fetch(`/api/rooms/${roomId}/study`, { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify({ action: "stop" }) 
+      });
+      
+      if (!res.ok) throw new Error("Failed to leave");
+      
+      setJoined(false);
+      if (timerRef.current) clearInterval(timerRef.current);
+      toast.success(`Study session ended! ${formatDuration(timer)}`);
+    } catch {
+      toast.error("Failed to leave");
+    } finally {
+      setLeaving(false);
+    }
   };
 
-  const changeMode = async (newMode: string) => { setMode(newMode); try { await fetch(`/api/rooms/${roomId}/study/mode`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: newMode }) }); } catch {} };
-  const changeNote = async (newNote: string) => { setNote(newNote); try { await fetch(`/api/rooms/${roomId}/study/note`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: newNote }) }); } catch {} };
+  const changeMode = async (newMode: string) => { 
+    setMode(newMode); 
+    try { await fetch(`/api/rooms/${roomId}/study/mode`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: newMode }) }); } catch {} 
+  };
+  
+  const changeNote = async (newNote: string) => { 
+    setNote(newNote); 
+    try { await fetch(`/api/rooms/${roomId}/study/note`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: newNote }) }); } catch {} 
+  };
 
   const formatDuration = (s: number) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return h > 0 ? `${h}h ${m}m` : `${m}m`; };
 
   const totalPages = Math.ceil(participants.length / perPage);
   const paginated = participants.slice(page * perPage, (page + 1) * perPage);
+
+  // Filter out duplicates based on userId
+  const uniqueParticipants = participants.filter((p, index, self) => 
+    index === self.findIndex((t) => t.userId === p.userId)
+  );
 
   return (
     <>
@@ -152,7 +243,7 @@ export function StudyRoom({ roomId, roomName, currentUserId, currentUserName, is
             <BookOpen size={20} className="sr-header-icon" />
             <div style={{ minWidth: 0 }}>
               <p className="sr-header-name">{roomName}</p>
-              <p className="sr-header-count">{participants.length} studying</p>
+              <p className="sr-header-count">{uniqueParticipants.length} studying</p>
             </div>
           </div>
           <div className="sr-header-right">
@@ -167,14 +258,28 @@ export function StudyRoom({ roomId, roomName, currentUserId, currentUserName, is
               </>
             )}
             {!joined ? (
-              <button className="join-btn" onClick={joinStudy}><LogIn size={14} />Join Study</button>
+              <button className="join-btn" onClick={joinStudy} disabled={joining}>
+                {joining ? (
+                  <span className="spinner" style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                ) : (
+                  <LogIn size={14} />
+                )}
+                {joining ? "Joining..." : "Join Study"}
+              </button>
             ) : (
-              <button className="leave-btn" onClick={leaveStudy}><LogOut size={14} />Leave</button>
+              <button className="leave-btn" onClick={leaveStudy} disabled={leaving}>
+                {leaving ? (
+                  <span className="spinner" style={{ width: 14, height: 14, border: "2px solid rgba(239,68,68,0.3)", borderTopColor: "#ef4444", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                ) : (
+                  <LogOut size={14} />
+                )}
+                {leaving ? "Leaving..." : "Leave"}
+              </button>
             )}
           </div>
         </div>
 
-        {participants.length === 0 && !joined ? (
+        {uniqueParticipants.length === 0 && !joined ? (
           <div className="empty-study">
             <BookOpen size={48} style={{ opacity: 0.2 }} />
             <p style={{ fontSize: "15px", fontWeight: 500 }}>No one studying yet</p>
@@ -213,6 +318,10 @@ export function StudyRoom({ roomId, roomName, currentUserId, currentUserName, is
           </div>
         )}
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes spin { to { transform: rotate(360deg); } }
+      ` }} />
     </>
   );
 }

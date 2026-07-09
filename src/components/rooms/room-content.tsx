@@ -64,6 +64,50 @@ const STYLES = `
 interface Room { id: string; name: string; type: string; order: number; }
 interface Member { id: string; name: string; image: string | null; currentGoal: string | null; streak: number; role: string; }
 
+// Helper: Format waktu ke WIB (GMT+7)
+function formatToWIB(dateStr: string): string {
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    
+    // Format ke WIB (Asia/Jakarta)
+    return new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  } catch {
+    return dateStr;
+  }
+}
+
+// Helper: Format waktu relatif ke WIB
+function formatRelativeTime(dateStr: string): string {
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHour = Math.floor(diffMs / 3600000);
+    const diffDay = Math.floor(diffMs / 86400000);
+    
+    if (diffMin < 1) return 'Baru saja';
+    if (diffMin < 60) return `${diffMin}m lalu`;
+    if (diffHour < 24) return `${diffHour}j lalu`;
+    if (diffDay < 7) return `${diffDay}h lalu`;
+    
+    // Kalo lebih dari seminggu, tampilkan tanggal lengkap
+    return formatToWIB(dateStr);
+  } catch {
+    return dateStr;
+  }
+}
+
 export function RoomContent({ squadId, squadName, rooms, isOwner, room, currentUserId, currentUserName, members }: {
   squadId: string; squadName: string; rooms: Room[]; isOwner: boolean;
   room: Room; currentUserId: string; currentUserName: string; members: Member[];
@@ -90,7 +134,6 @@ export function RoomContent({ squadId, squadName, rooms, isOwner, room, currentU
   const totalMemberPages = Math.ceil(localMembers.length / MEMBERS_PER_PAGE);
   const paginatedMembers = localMembers.slice(memberPage * MEMBERS_PER_PAGE, (memberPage + 1) * MEMBERS_PER_PAGE);
 
-  // Di handleViewChange:
   const handleViewChange = (view: string, roomId?: string) => {
     setLoading(true);
     setTimeout(() => {
@@ -170,7 +213,8 @@ export function RoomContent({ squadId, squadName, rooms, isOwner, room, currentU
                 <div key={n.id} className="notif-item">
                   <div className={`notif-icon ${n.type || "system"}`}>{n.type === "join" ? "+" : n.type === "leave" ? "−" : "i"}</div>
                   <p className="notif-text">{n.text}</p>
-                  <span className="notif-time">{n.time}</span>
+                  {/* FIX: Gunakan format waktu WIB */}
+                  <span className="notif-time">{formatRelativeTime(n.time)}</span>
                 </div>
               ))}
             </div>

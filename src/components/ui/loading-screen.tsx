@@ -1,26 +1,28 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Zap } from "lucide-react";
+import { Loader2, Target } from "lucide-react";
 
 const STYLES = `
-  .load-overlay{position:fixed;inset:0;z-index:200;background:rgba(7,12,20,0.95);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
-  .load-logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 40px -12px rgba(245,158,11,0.4);}
-  .load-bar{width:120px;height:3px;border-radius:2px;background:rgba(255,255,255,0.04);overflow:hidden;}
-  .load-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#f59e0b,#f97316);animation:loadSlide 1.2s ease-in-out infinite;}
-  @keyframes loadSlide{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
-  .load-text{font-size:13px;color:#5a6478;font-weight:400;letter-spacing:0.04em;}
+  .ls-wrap{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0f18;min-height:100vh;}
+  .ls-spinner{width:48px;height:48px;border:3px solid rgba(245,158,11,0.1);border-top-color:#f59e0b;border-radius:50%;animation:lsSpin 0.8s linear infinite;}
+  @keyframes lsSpin{to{transform:rotate(360deg)}}
+  .ls-text{margin-top:20px;font-size:14px;font-weight:500;color:#5a6478;animation:lsPulse 1.5s ease-in-out infinite;}
+  @keyframes lsPulse{0%,100%{opacity:0.5}50%{opacity:1}}
+  .ls-icon{color:#f59e0b;margin-bottom:16px;animation:lsBounce 1s ease-in-out infinite;}
+  @keyframes lsBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 `;
 
 export function LoadingScreen({ text = "Loading..." }: { text?: string }) {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-      <motion.div className="load-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-        <div className="load-logo"><Zap size={22} style={{ color: "#0a0a0a" }} /></div>
-        <div className="load-bar"><div className="load-bar-fill" /></div>
-        <p className="load-text">{text}</p>
-      </motion.div>
+      <div className="ls-wrap">
+        <div className="ls-icon">
+          <Target size={48} />
+        </div>
+        <div className="ls-spinner" />
+        <p className="ls-text">{text}</p>
+      </div>
     </>
   );
 }
