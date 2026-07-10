@@ -12,8 +12,8 @@ const STYLES = `
     width: 220px; 
     height: 100%; 
     flex-shrink: 0; 
-    background: rgba(10,15,24,0.9); 
-    border-right: 1px solid rgba(255,255,255,0.04); 
+    background: var(--bg-secondary); 
+    border-right: 1px solid var(--border-subtle); 
     backdrop-filter: blur(30px); 
     -webkit-backdrop-filter: blur(30px);
     display: flex; 
@@ -45,7 +45,7 @@ const STYLES = `
 
   .room-sb-header { 
     padding: 18px 18px; 
-    border-bottom: 1px solid rgba(255,255,255,0.04); 
+    border-bottom: 1px solid var(--border-subtle); 
     display: flex; 
     align-items: center; 
     justify-content: space-between; 
@@ -54,7 +54,7 @@ const STYLES = `
   .room-sb-title { 
     font-size: 17px; 
     font-weight: 700; 
-    color: #edeff2; 
+    color: var(--text-primary); 
     overflow: hidden; 
     text-overflow: ellipsis; 
     white-space: nowrap; 
@@ -64,7 +64,7 @@ const STYLES = `
   .room-sb-btn { 
     background: none; 
     border: none; 
-    color: #5a6478; 
+    color: var(--text-muted); 
     cursor: pointer; 
     padding: 6px; 
     border-radius: 8px; 
@@ -73,7 +73,7 @@ const STYLES = `
     align-items: center;
     justify-content: center;
   }
-  .room-sb-btn:hover { color: #f59e0b; background: rgba(245,158,11,0.06); }
+  .room-sb-btn:hover { color: var(--amber); background: rgba(245,158,11,0.06); }
   
   .room-sb-list { 
     flex: 1; 
@@ -89,7 +89,7 @@ const STYLES = `
     gap: 12px; 
     padding: 10px 14px; 
     border-radius: 12px;
-    color: #9aa4b8; 
+    color: var(--text-secondary); 
     cursor: pointer; 
     font-size: 13px; 
     font-weight: 500;
@@ -103,9 +103,9 @@ const STYLES = `
     font-family: 'Inter', sans-serif;
     position: relative;
   }
-  .room-sb-item:hover { color: #edeff2; background: rgba(255,255,255,0.02); }
+  .room-sb-item:hover { color: var(--text-primary); background: var(--border-subtle); }
   .room-sb-item.active { 
-    color: #f59e0b; 
+    color: var(--amber); 
     background: rgba(245,158,11,0.06); 
     border: 1px solid rgba(245,158,11,0.12);
     box-shadow: 0 0 20px rgba(245,158,11,0.04);
@@ -117,24 +117,24 @@ const STYLES = `
     top: 10px; 
     bottom: 10px;
     width: 2px; 
-    background: #f59e0b; 
+    background: var(--amber); 
     border-radius: 0 2px 2px 0;
   }
-  .room-sb-item.danger { color: #5a6478; }
-  .room-sb-item.danger:hover { color: #ef4444; background: rgba(239,68,68,0.04); }
+  .room-sb-item.danger { color: var(--text-muted); }
+  .room-sb-item.danger:hover { color: var(--red); background: rgba(239,68,68,0.04); }
   .room-sb-icon { flex-shrink: 0; }
   .room-sb-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
   .room-sb-del { 
     opacity: 0; 
-    color: #5a6478; 
+    color: var(--text-muted); 
     cursor: pointer; 
     flex-shrink: 0; 
   }
   .room-sb-item:hover .room-sb-del { opacity: 1; }
-  .room-sb-del:hover { color: #ef4444; }
+  .room-sb-del:hover { color: var(--red); }
   .notif-badge { 
     margin-left: auto; 
-    background: #ef4444; 
+    background: var(--red); 
     color: #fff; 
     font-size: 10px; 
     padding: 2px 6px; 
@@ -150,7 +150,7 @@ const STYLES = `
 
   .create-inline { 
     padding: 10px 12px; 
-    border-bottom: 1px solid rgba(255,255,255,0.04); 
+    border-bottom: 1px solid var(--border-subtle); 
     display: flex; 
     flex-direction: column; 
     gap: 6px; 
@@ -159,23 +159,23 @@ const STYLES = `
     width: 100%; 
     padding: 8px 10px; 
     border-radius: 8px; 
-    border: 1px solid rgba(255,255,255,0.06); 
-    background: rgba(255,255,255,0.02); 
-    color: #edeff2; 
+    border: 1px solid var(--border-medium); 
+    background: var(--bg-input); 
+    color: var(--text-primary); 
     font-size: 12px; 
     outline: none; 
     font-family: 'Inter', sans-serif; 
   }
   .create-input:focus { border-color: rgba(245,158,11,0.4); }
-  .create-input::placeholder { color: #3a4458; }
+  .create-input::placeholder { color: var(--text-muted); opacity: 0.5; }
   .type-row { display: flex; gap: 4px; }
   .type-opt { 
     flex: 1; 
     padding: 6px 8px; 
     border-radius: 7px; 
-    border: 1px solid rgba(255,255,255,0.05); 
-    background: rgba(255,255,255,0.015); 
-    color: #5a6478; 
+    border: 1px solid var(--border-medium); 
+    background: var(--bg-input); 
+    color: var(--text-muted); 
     cursor: pointer; 
     font-size: 10px; 
     font-weight: 500; 
@@ -187,15 +187,15 @@ const STYLES = `
     justify-content: center;
     gap: 4px;
   }
-  .type-opt:hover { border-color: rgba(245,158,11,0.3); color: #9aa4b8; }
-  .type-opt.sel { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08); color: #f59e0b; }
+  .type-opt:hover { border-color: rgba(245,158,11,0.3); color: var(--text-secondary); }
+  .type-opt.sel { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08); color: var(--amber); }
   .create-submit { 
     width: 100%; 
     padding: 8px; 
     border-radius: 8px; 
     border: none; 
-    background: linear-gradient(135deg, #f59e0b, #f97316); 
-    color: #0a0a0a; 
+    background: linear-gradient(135deg, var(--amber), var(--orange)); 
+    color: var(--text-inverse); 
     font-size: 12px; 
     font-weight: 600; 
     cursor: pointer; 
@@ -206,7 +206,7 @@ const STYLES = `
   .section-label { 
     font-size: 10px; 
     font-weight: 600; 
-    color: #5a6478; 
+    color: var(--text-muted); 
     text-transform: uppercase; 
     letter-spacing: 0.1em; 
     padding: 8px 14px 4px; 
@@ -214,7 +214,7 @@ const STYLES = `
 
   .room-sb-bottom { 
     padding: 14px 10px; 
-    border-top: 1px solid rgba(255,255,255,0.04); 
+    border-top: 1px solid var(--border-subtle); 
     display: flex; 
     flex-direction: column; 
     gap: 6px; 
@@ -225,7 +225,7 @@ const STYLES = `
     position: fixed; 
     inset: 0; 
     z-index: 40; 
-    background: rgba(0,0,0,0.5); 
+    background: var(--bg-overlay); 
   }
 
   /* TOGGLE BUTTON - di kiri tengah */
@@ -243,7 +243,7 @@ const STYLES = `
     border: 1px solid rgba(245,158,11,0.2);
     border-left: none;
     border-radius: 0 10px 10px 0;
-    color: #f59e0b;
+    color: var(--amber);
     cursor: pointer;
     display: none;
     align-items: center;
@@ -501,7 +501,7 @@ export function RoomSidebar({
             );
           })}
           {rooms.length === 0 && !collapsed && (
-            <p style={{ fontSize: "12px", color: "#3a4458", padding: "4px 14px" }}>No rooms yet</p>
+            <p style={{ fontSize: "12px", color: "var(--text-muted)", padding: "4px 14px" }}>No rooms yet</p>
           )}
         </div>
 

@@ -7,16 +7,9 @@ import { toast } from "sonner";
 
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
-  :root {
-    --bg-deep: #070c14;
-    --text: #edeff2;
-    --text-secondary: #9aa4b8;
-    --text-muted: #5a6478;
-    --accent: #f59e0b;
-    --accent-2: #f97316;
-  }
+  
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; background: var(--bg-deep); }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; background: var(--bg-primary); }
   ::-webkit-scrollbar { width: 0; }
 
   /* Ambient */
@@ -33,8 +26,8 @@ const STYLES = `
     50% { transform: scale(1.06) translate(-1%, 1%); opacity: 0.8; }
   }
   .blob { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(100px); opacity: 0.1; z-index: 0; }
-  .blob-a { width: 400px; height: 400px; background: #f59e0b; top: -8%; right: -5%; animation: blobA 16s ease-in-out infinite; }
-  .blob-b { width: 300px; height: 300px; background: #8b5cf6; bottom: -5%; left: -3%; animation: blobB 20s ease-in-out infinite; }
+  .blob-a { width: 400px; height: 400px; background: var(--amber); top: -8%; right: -5%; animation: blobA 16s ease-in-out infinite; }
+  .blob-b { width: 300px; height: 300px; background: var(--purple); bottom: -5%; left: -3%; animation: blobB 20s ease-in-out infinite; }
   @keyframes blobA { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-40px,30px) scale(1.2)} }
   @keyframes blobB { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-25px) scale(1.15)} }
 
@@ -44,7 +37,7 @@ const STYLES = `
   /* Left Panel — Image */
   .image-panel {
     flex: 1; position: relative; overflow: hidden;
-    background: #0a1018;
+    background: var(--bg-secondary);
     display: flex; align-items: center; justify-content: center;
   }
   .image-panel img {
@@ -57,39 +50,14 @@ const STYLES = `
   .image-panel:hover img { transform: scale(1.08); }
   .image-overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(to left, rgba(7,12,20,0.95), rgba(7,12,20,0.3) 30%, transparent 55%);
     z-index: 2;
   }
   .image-quote {
     position: absolute; bottom: 60px; left: 60px; right: 60px; z-index: 5;
     font-family: 'Playfair Display', Georgia, serif;
     font-size: clamp(20px, 3vw, 28px); font-style: italic;
-    color: rgba(255,255,255,0.7); line-height: 1.5;
+    color: var(--text-secondary); line-height: 1.5;
     text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-  }
-
-  /* ===== HARD BLEND SEAM (fusion antara 2 section) ===== */
-  .panel-seam {
-    position: absolute; top: 0; bottom: 0; left: 0; width: 100%;
-    z-index: 4; pointer-events: none; overflow: hidden;
-  }
-  .panel-seam::before {
-    content: ''; position: absolute; top: -10%; bottom: -10%; left: 50%;
-    width: 340px; transform: translateX(-50%);
-    background: radial-gradient(ellipse 55% 100% at 50% 50%, rgba(245,158,11,0.22) 0%, rgba(249,115,22,0.1) 35%, transparent 72%);
-    filter: blur(60px);
-    mix-blend-mode: screen;
-    animation: seamPulse 9s ease-in-out infinite;
-  }
-  .panel-seam::after {
-    content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
-    width: 120px; transform: translateX(-50%);
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.035), transparent);
-    mix-blend-mode: overlay;
-  }
-  @keyframes seamPulse {
-    0%, 100% { opacity: 0.7; transform: translateX(-50%) scaleY(1); }
-    50% { opacity: 1; transform: translateX(-50%) scaleY(1.08); }
   }
 
   /* ===== 3D FLOATING OBJECTS ===== */
@@ -138,7 +106,7 @@ const STYLES = `
   .form-panel {
     flex: 0.85; display: flex; align-items: center; justify-content: center;
     padding: 40px; position: relative; z-index: 5;
-    background: rgba(7,12,20,0.4); backdrop-filter: blur(10px);
+    background: var(--bg-card); backdrop-filter: blur(10px);
     overflow: hidden;
   }
   .form-inner { width: 80%; max-width: 420px; position: relative; z-index: 6; }
@@ -147,40 +115,40 @@ const STYLES = `
   .input-group { position: relative; margin-bottom: 18px; }
   .input-group .icon {
     position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-    color: #5a6478; transition: color 0.3s; z-index: 2; pointer-events: none;
+    color: var(--text-muted); transition: color 0.3s; z-index: 2; pointer-events: none;
   }
   .input-group input {
     width: 100%; padding: 16px 16px 16px 48px;
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 14px; font-size: 15px; color: #edeff2;
+    background: var(--bg-input); border: 1px solid var(--border-medium);
+    border-radius: 14px; font-size: 15px; color: var(--text-primary);
     font-family: 'Inter', sans-serif; outline: none;
     transition: all 0.3s ease; letter-spacing: 0.02em;
   }
   .input-group input:focus {
     border-color: rgba(245,158,11,0.4);
-    background: rgba(255,255,255,0.03);
+    background: var(--bg-input);
     box-shadow: 0 0 0 4px rgba(245,158,11,0.04);
   }
   .input-group input:focus + .icon,
-  .input-group input:focus ~ .icon { color: #f59e0b; }
-  .input-group input::placeholder { color: #3a4458; }
+  .input-group input:focus ~ .icon { color: var(--amber); }
+  .input-group input::placeholder { color: var(--text-muted); opacity: 0.5; }
   .toggle-password {
     position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; color: #5a6478; cursor: pointer;
+    background: none; border: none; color: var(--text-muted); cursor: pointer;
     padding: 4px; transition: color 0.3s; z-index: 2;
   }
-  .toggle-password:hover { color: #9aa4b8; }
+  .toggle-password:hover { color: var(--text-secondary); }
 
   /* Strength bar */
-  .strength-bar { height: 3px; border-radius: 2px; margin-top: 8px; background: rgba(255,255,255,0.05); overflow: hidden; }
+  .strength-bar { height: 3px; border-radius: 2px; margin-top: 8px; background: var(--border-medium); overflow: hidden; }
   .strength-fill { height: 100%; border-radius: 2px; transition: all 0.4s ease; }
   .strength-text { font-size: 11px; margin-top: 4px; transition: color 0.3s; }
 
   /* Button */
   .btn-submit {
     width: 100%; padding: 16px; border-radius: 14px;
-    background: linear-gradient(135deg, #f59e0b, #f97316);
-    color: #0a0a0a; font-size: 15px; font-weight: 600;
+    background: linear-gradient(135deg, var(--amber), var(--orange));
+    color: var(--text-inverse); font-size: 15px; font-weight: 600;
     border: none; cursor: pointer; letter-spacing: 0.02em;
     display: flex; align-items: center; justify-content: center; gap: 10px;
     transition: all 0.4s cubic-bezier(0.22,0.61,0.36,1);
@@ -201,8 +169,8 @@ const STYLES = `
   .d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.4s}.d5{animation-delay:.5s}.d6{animation-delay:.6s}.d7{animation-delay:.7s}
 
   .divider-text { display: flex; align-items: center; gap: 14px; margin: 22px 0; }
-  .divider-text::before, .divider-text::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
-  .divider-text span { font-size: 11px; color: #3a4458; letter-spacing: 0.1em; text-transform: uppercase; }
+  .divider-text::before, .divider-text::after { content: ''; flex: 1; height: 1px; background: var(--border-medium); }
+  .divider-text span { font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
 
   @media (max-width: 768px) {
     .image-panel { display: none; }
@@ -220,11 +188,11 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const getStrength = (pwd: string): { width: string; color: string; label: string; textColor: string } => {
-    if (pwd.length === 0) return { width: "0%", color: "transparent", label: "", textColor: "#5a6478" };
-    if (pwd.length < 6) return { width: "25%", color: "#ef4444", label: "Too weak", textColor: "#ef4444" };
-    if (pwd.length < 8) return { width: "50%", color: "#f97316", label: "Getting better", textColor: "#f97316" };
-    if (pwd.length < 10) return { width: "75%", color: "#f59e0b", label: "Almost there", textColor: "#f59e0b" };
-    return { width: "100%", color: "#10b981", label: "Strong password", textColor: "#10b981" };
+    if (pwd.length === 0) return { width: "0%", color: "transparent", label: "", textColor: "var(--text-muted)" };
+    if (pwd.length < 6) return { width: "25%", color: "var(--red)", label: "Too weak", textColor: "var(--red)" };
+    if (pwd.length < 8) return { width: "50%", color: "var(--orange)", label: "Getting better", textColor: "var(--orange)" };
+    if (pwd.length < 10) return { width: "75%", color: "var(--amber)", label: "Almost there", textColor: "var(--amber)" };
+    return { width: "100%", color: "var(--green)", label: "Strong password", textColor: "var(--green)" };
   };
   const strength = getStrength(password);
 
@@ -293,17 +261,17 @@ export default function RegisterPage() {
           <div className="form-inner">
             {/* Logo */}
             <Link href="/" className="afi" style={{ display: "inline-flex", alignItems: "center", gap: "10px", textDecoration: "none", marginBottom: "36px" }}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "9px", background: "linear-gradient(135deg, #f59e0b, #f97316)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Zap size={16} style={{ color: "#0a0a0a" }} />
+              <div style={{ width: "32px", height: "32px", borderRadius: "9px", background: "linear-gradient(135deg, var(--amber), var(--orange))", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Zap size={16} style={{ color: "var(--text-inverse)" }} />
               </div>
-              <span style={{ fontWeight: 700, color: "#edeff2", fontSize: "18px", letterSpacing: "0.02em" }}>ASCEND</span>
+              <span style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: "18px", letterSpacing: "0.02em" }}>ASCEND</span>
             </Link>
 
             {/* Heading */}
-            <h1 className="afu" style={{ fontSize: "clamp(28px, 4vw, 36px)", fontWeight: 700, color: "#edeff2", letterSpacing: "-0.02em", marginBottom: "6px" }}>
+            <h1 className="afu" style={{ fontSize: "clamp(28px, 4vw, 36px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em", marginBottom: "6px" }}>
               Join ASCEND
             </h1>
-            <p className="afu d1" style={{ fontSize: "15px", color: "#5a6478", marginBottom: "32px", fontWeight: 300 }}>
+            <p className="afu d1" style={{ fontSize: "15px", color: "var(--text-muted)", marginBottom: "32px", fontWeight: 300 }}>
               Find your people. Build your future.
             </p>
 
@@ -346,7 +314,7 @@ export default function RegisterPage() {
 
               <button type="submit" disabled={loading} className="btn-submit afu d5">
                 {loading ? (
-                  <div style={{ width: "20px", height: "20px", border: "2px solid rgba(0,0,0,0.3)", borderTopColor: "#0a0a0a", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+                  <div style={{ width: "20px", height: "20px", border: "2px solid rgba(0,0,0,0.3)", borderTopColor: "var(--text-inverse)", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
                 ) : (
                   <>Create Account <ArrowRight size={16} /></>
                 )}
@@ -354,17 +322,17 @@ export default function RegisterPage() {
             </form>
 
             <div className="afu d6 divider-text"><span>or</span></div>
-            <p className="afu d6" style={{ textAlign: "center", fontSize: "14px", color: "#5a6478" }}>
+            <p className="afu d6" style={{ textAlign: "center", fontSize: "14px", color: "var(--text-muted)" }}>
               Already have an account?{" "}
-              <Link href="/login" style={{ color: "#f59e0b", textDecoration: "none", fontWeight: 500, transition: "color 0.3s" }}>
+              <Link href="/login" style={{ color: "var(--amber)", textDecoration: "none", fontWeight: 500, transition: "color 0.3s" }}>
                 Sign in <ChevronRight size={12} style={{ display: "inline", verticalAlign: "middle" }} />
               </Link>
             </p>
 
             {/* Trust badge */}
             <div className="afi d7" style={{ marginTop: "28px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-              <Sparkles size={14} style={{ color: "#f59e0b" }} />
-              <span style={{ fontSize: "12px", color: "#5a6478" }}>Join 4,800+ dreamers already on ASCEND</span>
+              <Sparkles size={14} style={{ color: "var(--amber)" }} />
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>Join 4,800+ dreamers already on ASCEND</span>
             </div>
           </div>
         </div>

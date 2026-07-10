@@ -11,15 +11,14 @@ import {
 import { toast } from "sonner";
 
 const STYLES = `
-  :root { --bg-deep: #070c14; --text: #edeff2; --text-secondary: #9aa4b8; --text-muted: #5a6478; --border: rgba(255,255,255,0.06); }
-  .onboard-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: var(--bg-deep); position: relative; overflow: hidden; }
+  .onboard-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: var(--bg-primary); position: relative; overflow: hidden; }
   .onboard-wrap::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 50% 40% at 20% 50%, rgba(245,158,11,0.04) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 80% 40%, rgba(249,115,22,0.03) 0%, transparent 60%); }
   @media (min-width: 480px) { .onboard-wrap { padding: 32px; } }
   .onboard-card { position: relative; z-index: 10; width: 100%; max-width: 640px; }
   .progress-bar { display: flex; gap: 6px; justify-content: center; margin-bottom: 24px; }
   @media (min-width: 480px) { .progress-bar { margin-bottom: 32px; } }
   .progress-dot { height: 4px; border-radius: 4px; transition: all 0.5s cubic-bezier(0.22,0.61,0.36,1); }
-  .step-counter { text-align: center; font-size: 11px; color: #5a6478; margin-bottom: 16px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .step-counter { text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 16px; letter-spacing: 0.1em; text-transform: uppercase; }
   @media (min-width: 480px) { .step-counter { font-size: 12px; margin-bottom: 20px; } }
 
   /* ===== FLOATING GOAL BUBBLES (decorative, behind card) ===== */
@@ -39,10 +38,10 @@ const STYLES = `
 
   .goal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; position: relative; z-index: 5; }
   @media (min-width: 480px) { .goal-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
-  .goal-btn { padding: 10px 8px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.015); cursor: pointer; text-align: center; transition: all 0.3s ease; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; color: #9aa4b8; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .goal-btn { padding: 10px 8px; border-radius: 14px; border: 1px solid var(--border-medium); background: var(--bg-input); cursor: pointer; text-align: center; transition: all 0.3s ease; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 6px; }
   @media (min-width: 480px) { .goal-btn { padding: 14px 10px; font-size: 13px; border-radius: 16px; } }
-  .goal-btn:hover { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); color: #edeff2; }
-  .goal-btn.active { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08); color: #f59e0b; box-shadow: 0 0 30px rgba(245,158,11,0.08); }
+  .goal-btn:hover { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); color: var(--text-primary); }
+  .goal-btn.active { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08); color: var(--amber); box-shadow: 0 0 30px rgba(245,158,11,0.08); }
   .goal-icon { display: flex; justify-content: center; }
 
   /* ===== CATEGORY TABS ===== */
@@ -50,43 +49,43 @@ const STYLES = `
   .category-tabs::-webkit-scrollbar { display: none; }
   .category-pill {
     flex-shrink: 0; display: flex; align-items: center; gap: 6px;
-    padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.02); color: #5a6478; font-size: 12px; font-weight: 500;
+    padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border-medium);
+    background: var(--bg-input); color: var(--text-muted); font-size: 12px; font-weight: 500;
     cursor: pointer; transition: all 0.3s ease; white-space: nowrap; font-family: 'Inter', sans-serif;
   }
-  .category-pill:hover { color: #9aa4b8; border-color: rgba(245,158,11,0.2); }
+  .category-pill:hover { color: var(--text-secondary); border-color: rgba(245,158,11,0.2); }
   .category-pill.active {
     background: linear-gradient(135deg, rgba(245,158,11,0.16), rgba(249,115,22,0.08));
-    border-color: rgba(245,158,11,0.4); color: #f59e0b;
+    border-color: rgba(245,158,11,0.4); color: var(--amber);
   }
 
   /* ===== SEARCH ===== */
   .goal-search { position: relative; margin-bottom: 14px; z-index: 5; }
   .goal-search input {
     width: 100%; padding: 12px 14px 12px 40px; border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);
-    color: #edeff2; font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: all 0.3s ease;
+    border: 1px solid var(--border-medium); background: var(--bg-input);
+    color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: all 0.3s ease;
   }
   .goal-search input:focus { border-color: rgba(245,158,11,0.4); box-shadow: 0 0 0 4px rgba(245,158,11,0.04); }
-  .goal-search input::placeholder { color: #3a4458; }
-  .goal-search .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #5a6478; pointer-events: none; }
+  .goal-search input::placeholder { color: var(--text-muted); opacity: 0.5; }
+  .goal-search .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
 
-  .no-results { text-align: center; padding: 28px 12px; color: #3a4458; font-size: 12px; position: relative; z-index: 5; }
+  .no-results { text-align: center; padding: 28px 12px; color: var(--text-muted); font-size: 12px; position: relative; z-index: 5; }
 
   /* ===== CUSTOM GOAL ===== */
   .custom-goal-box { display: flex; gap: 8px; margin-top: 16px; position: relative; z-index: 5; }
   .custom-goal-box input {
     flex: 1; padding: 12px 14px; border-radius: 12px;
     border: 1px dashed rgba(245,158,11,0.28); background: rgba(245,158,11,0.02);
-    color: #edeff2; font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: all 0.3s ease;
+    color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: all 0.3s ease;
   }
   .custom-goal-box input:focus { border-color: rgba(245,158,11,0.5); border-style: solid; background: rgba(245,158,11,0.04); }
-  .custom-goal-box input::placeholder { color: #3a4458; }
+  .custom-goal-box input::placeholder { color: var(--text-muted); opacity: 0.5; }
   .btn-add-goal {
     flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px;
-    background: linear-gradient(135deg, #f59e0b, #f97316); border: none;
+    background: linear-gradient(135deg, var(--amber), var(--orange)); border: none;
     display: flex; align-items: center; justify-content: center; cursor: pointer;
-    color: #0a0a0a; transition: all 0.3s ease; box-shadow: 0 10px 26px -12px rgba(245,158,11,0.4);
+    color: var(--text-inverse); transition: all 0.3s ease; box-shadow: 0 10px 26px -12px rgba(245,158,11,0.4);
   }
   .btn-add-goal:hover { transform: scale(1.06) rotate(90deg); }
   .btn-add-goal:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
@@ -100,7 +99,7 @@ const STYLES = `
   }
   .custom-chip.active {
     background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(249,115,22,0.1));
-    color: #f59e0b; box-shadow: 0 0 20px rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.5);
+    color: var(--amber); box-shadow: 0 0 20px rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.5);
   }
   .custom-chip .chip-x { background: none; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; padding: 2px; opacity: 0.5; transition: opacity 0.2s; }
   .custom-chip .chip-x:hover { opacity: 1; }
@@ -109,56 +108,56 @@ const STYLES = `
     display: flex; align-items: center; justify-content: center; gap: 8px;
     margin-top: 18px; padding: 10px 16px; border-radius: 12px;
     background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
-    color: #10b981; font-size: 12px; font-weight: 500; position: relative; z-index: 5;
+    color: var(--green); font-size: 12px; font-weight: 500; position: relative; z-index: 5;
   }
 
   .commitment-list { display: flex; flex-direction: column; gap: 6px; }
   @media (min-width: 480px) { .commitment-list { gap: 8px; } }
-  .commitment-btn { width: 100%; padding: 13px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.015); cursor: pointer; text-align: left; transition: all 0.3s ease; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #9aa4b8; display: flex; align-items: center; gap: 10px; }
+  .commitment-btn { width: 100%; padding: 13px 16px; border-radius: 14px; border: 1px solid var(--border-medium); background: var(--bg-input); cursor: pointer; text-align: left; transition: all 0.3s ease; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; }
   @media (min-width: 480px) { .commitment-btn { padding: 16px 20px; font-size: 14px; border-radius: 16px; } }
-  .commitment-btn:hover { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); color: #edeff2; }
-  .commitment-btn.active { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08); color: #f59e0b; }
+  .commitment-btn:hover { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); color: var(--text-primary); }
+  .commitment-btn.active { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08); color: var(--amber); }
   .commitment-icon { flex-shrink: 0; }
 
   .challenge-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
   @media (min-width: 480px) { .challenge-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
-  .challenge-btn { padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.015); cursor: pointer; text-align: left; transition: all 0.3s ease; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: #9aa4b8; display: flex; align-items: center; gap: 8px; }
+  .challenge-btn { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border-medium); background: var(--bg-input); cursor: pointer; text-align: left; transition: all 0.3s ease; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
   @media (min-width: 480px) { .challenge-btn { padding: 14px 16px; font-size: 13px; border-radius: 14px; } }
-  .challenge-btn:hover { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); color: #edeff2; }
-  .challenge-btn.active { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08); color: #f59e0b; }
+  .challenge-btn:hover { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); color: var(--text-primary); }
+  .challenge-btn.active { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.08); color: var(--amber); }
 
-  .onboard-input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color: #edeff2; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: all 0.3s ease; }
+  .onboard-input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-medium); background: var(--bg-input); color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: all 0.3s ease; }
   @media (min-width: 480px) { .onboard-input { padding: 16px 20px; font-size: 15px; border-radius: 14px; } }
   .onboard-input:focus { border-color: rgba(245,158,11,0.4); box-shadow: 0 0 0 4px rgba(245,158,11,0.04); }
-  .onboard-input::placeholder { color: #3a4458; }
+  .onboard-input::placeholder { color: var(--text-muted); opacity: 0.5; }
 
-  .btn-back { background: none; border: none; color: #5a6478; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400; transition: color 0.3s; padding: 8px 0; }
+  .btn-back { background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400; transition: color 0.3s; padding: 8px 0; }
   @media (min-width: 480px) { .btn-back { font-size: 14px; } }
-  .btn-back:hover { color: #9aa4b8; }
+  .btn-back:hover { color: var(--text-secondary); }
 
-  .btn-next { padding: 12px 22px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #f97316); color: #0a0a0a; font-size: 13px; font-weight: 600; border: none; cursor: pointer; letter-spacing: 0.02em; display: flex; align-items: center; gap: 6px; transition: all 0.3s cubic-bezier(0.22,0.61,0.36,1); box-shadow: 0 12px 30px -12px rgba(245,158,11,0.35); font-family: 'Inter', sans-serif; }
+  .btn-next { padding: 12px 22px; border-radius: 12px; background: linear-gradient(135deg, var(--amber), var(--orange)); color: var(--text-inverse); font-size: 13px; font-weight: 600; border: none; cursor: pointer; letter-spacing: 0.02em; display: flex; align-items: center; gap: 6px; transition: all 0.3s cubic-bezier(0.22,0.61,0.36,1); box-shadow: 0 12px 30px -12px rgba(245,158,11,0.35); font-family: 'Inter', sans-serif; }
   @media (min-width: 480px) { .btn-next { padding: 14px 28px; font-size: 14px; border-radius: 14px; } }
   .btn-next:hover { transform: translateY(-2px); box-shadow: 0 20px 40px -12px rgba(245,158,11,0.5); }
   .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-  .btn-enter { padding: 14px 32px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #f97316); color: #0a0a0a; font-size: 14px; font-weight: 600; border: none; cursor: pointer; letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px; transition: all 0.3s cubic-bezier(0.22,0.61,0.36,1); box-shadow: 0 16px 40px -16px rgba(245,158,11,0.4); font-family: 'Inter', sans-serif; margin: 0 auto; }
+  .btn-enter { padding: 14px 32px; border-radius: 14px; background: linear-gradient(135deg, var(--amber), var(--orange)); color: var(--text-inverse); font-size: 14px; font-weight: 600; border: none; cursor: pointer; letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px; transition: all 0.3s cubic-bezier(0.22,0.61,0.36,1); box-shadow: 0 16px 40px -16px rgba(245,158,11,0.4); font-family: 'Inter', sans-serif; margin: 0 auto; }
   @media (min-width: 480px) { .btn-enter { padding: 16px 40px; font-size: 15px; border-radius: 16px; } }
   .btn-enter:hover { transform: translateY(-2px); box-shadow: 0 24px 50px -16px rgba(245,158,11,0.55); }
   .btn-enter:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  .section-title { font-size: clamp(20px, 4vw, 28px); font-weight: 700; color: #edeff2; margin-bottom: 6px; letter-spacing: -0.02em; }
-  .section-desc { font-size: 13px; color: #5a6478; margin-bottom: 24px; font-weight: 300; }
+  .section-title { font-size: clamp(20px, 4vw, 28px); font-weight: 700; color: var(--text-primary); margin-bottom: 6px; letter-spacing: -0.02em; }
+  .section-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; font-weight: 300; }
   @media (min-width: 480px) { .section-desc { font-size: 14px; margin-bottom: 28px; } }
 
-  .icon-box { width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, #f59e0b, #f97316); display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 12px 30px -10px rgba(245,158,11,0.35); }
+  .icon-box { width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, var(--amber), var(--orange)); display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 12px 30px -10px rgba(245,158,11,0.35); }
   @media (min-width: 480px) { .icon-box { width: 56px; height: 56px; border-radius: 18px; } }
 
   .quote-box { margin-top: 16px; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(245,158,11,0.1); background: rgba(245,158,11,0.03); }
   @media (min-width: 480px) { .quote-box { padding: 16px 20px; border-radius: 14px; } }
-  .quote-text { font-size: 12px; color: #9aa4b8; font-style: italic; line-height: 1.6; }
+  .quote-text { font-size: 12px; color: var(--text-secondary); font-style: italic; line-height: 1.6; }
   @media (min-width: 480px) { .quote-text { font-size: 13px; } }
 
-  .spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(245,158,11,0.15); border-top-color: #f59e0b; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+  .spinner { width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(245,158,11,0.15); border-top-color: var(--amber); animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
   @media (min-width: 480px) { .spinner { width: 44px; height: 44px; margin: 0 auto 24px; } }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -340,7 +339,7 @@ export function OnboardingSteps() {
             {Array.from({ length: totalSteps }).map((_, i) => (
               <div key={i} className="progress-dot" style={{
                 width: i <= step ? "32px" : "16px",
-                background: i <= step ? "#f59e0b" : "rgba(255,255,255,0.06)",
+                background: i <= step ? "var(--amber)" : "var(--border-medium)",
                 boxShadow: i <= step ? "0 0 12px rgba(245,158,11,0.3)" : "none",
               }} />
             ))}
@@ -354,7 +353,7 @@ export function OnboardingSteps() {
               {/* STEP 0 — REDESIGNED GOAL SELECTION */}
               {step === 0 && (
                 <div style={{ textAlign: "center", position: "relative" }}>
-                  <div className="asi" style={{ marginBottom: "20px" }}><div className="icon-box"><Compass size={24} style={{ color: "#0a0a0a" }} /></div></div>
+                  <div className="asi" style={{ marginBottom: "20px" }}><div className="icon-box"><Compass size={24} style={{ color: "var(--text-inverse)" }} /></div></div>
                   <h2 className="section-title afu">Pilih tujuanmu</h2>
                   <p className="section-desc afu">Satu langkah besar dimulai dari satu tujuan yang jelas</p>
 
@@ -440,7 +439,7 @@ export function OnboardingSteps() {
               {/* STEP 1 */}
               {step === 1 && (
                 <div style={{ textAlign: "center" }}>
-                  <div className="asi" style={{ marginBottom: "20px" }}><div className="icon-box"><Heart size={24} style={{ color: "#0a0a0a" }} /></div></div>
+                  <div className="asi" style={{ marginBottom: "20px" }}><div className="icon-box"><Heart size={24} style={{ color: "var(--text-inverse)" }} /></div></div>
                   <h2 className="section-title afu">Seberapa serius kamu?</h2>
                   <p className="section-desc afu">Biar kami bisa temukan partner yang se-level</p>
                   <div className="commitment-list afu">
@@ -459,7 +458,7 @@ export function OnboardingSteps() {
               {/* STEP 2 */}
               {step === 2 && (
                 <div style={{ textAlign: "center" }}>
-                  <div className="asi" style={{ marginBottom: "20px" }}><div className="icon-box"><Zap size={24} style={{ color: "#0a0a0a" }} /></div></div>
+                  <div className="asi" style={{ marginBottom: "20px" }}><div className="icon-box"><Zap size={24} style={{ color: "var(--text-inverse)" }} /></div></div>
                   <h2 className="section-title afu">Apa tantangan terbesarmu?</h2>
                   <p className="section-desc afu">Pilih maksimal 3. Biar AI kami ngerti kamu lebih dalam</p>
                   <div className="challenge-grid afu">
@@ -472,14 +471,14 @@ export function OnboardingSteps() {
                       );
                     })}
                   </div>
-                  <p style={{ fontSize: "11px", color: "#3a4458", marginTop: "12px" }}>{data.challenges.length}/3 terpilih</p>
+                  <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "12px" }}>{data.challenges.length}/3 terpilih</p>
                 </div>
               )}
 
               {/* STEP 3 */}
               {step === 3 && (
                 <div style={{ textAlign: "center" }}>
-                  <div className="asi" style={{ marginBottom: "20px" }}><div className="icon-box"><Sparkles size={24} style={{ color: "#0a0a0a" }} /></div></div>
+                  <div className="asi" style={{ marginBottom: "20px" }}><div className="icon-box"><Sparkles size={24} style={{ color: "var(--text-inverse)" }} /></div></div>
                   <h2 className="section-title afu">Bayangkan dirimu 5 tahun lagi</h2>
                   <p className="section-desc afu">Jika semua berjalan lancar, siapa dirimu?</p>
                   <div className="afu"><input className="onboard-input" placeholder='Contoh: "Software Engineer di Google", "Dokter spesialis"...' value={data.futureSelf} onChange={(e) => updateData("futureSelf", e.target.value)} /></div>
@@ -493,8 +492,8 @@ export function OnboardingSteps() {
               {step === 4 && (
                 <div style={{ textAlign: "center", paddingTop: "32px" }}>
                   <div className="spinner" />
-                  <h2 className="afu" style={{ fontSize: "20px", fontWeight: 600, color: "#edeff2", marginBottom: "6px" }}>Menganalisis tujuanmu...</h2>
-                  <p className="afu" style={{ fontSize: "13px", color: "#5a6478", fontWeight: 300 }}>Menemukan jalur terbaik untuk masa depanmu</p>
+                  <h2 className="afu" style={{ fontSize: "20px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "6px" }}>Menganalisis tujuanmu...</h2>
+                  <p className="afu" style={{ fontSize: "13px", color: "var(--text-muted)", fontWeight: 300 }}>Menemukan jalur terbaik untuk masa depanmu</p>
                 </div>
               )}
             </motion.div>
@@ -512,7 +511,7 @@ export function OnboardingSteps() {
           {step === 4 && (
             <div style={{ display: "flex", justifyContent: "center", marginTop: "28px" }}>
               <button className="btn-enter" disabled={loading}>
-                {loading ? <span style={{ width: "16px", height: "16px", border: "2px solid rgba(0,0,0,0.3)", borderTopColor: "#0a0a0a", borderRadius: "50%", animation: "spin 0.6s linear infinite", display: "inline-block", marginRight: "8px" }} /> : <Rocket size={16} style={{ marginRight: "6px" }} />}
+                {loading ? <span style={{ width: "16px", height: "16px", border: "2px solid rgba(0,0,0,0.3)", borderTopColor: "var(--text-inverse)", borderRadius: "50%", animation: "spin 0.6s linear infinite", display: "inline-block", marginRight: "8px" }} /> : <Rocket size={16} style={{ marginRight: "6px" }} />}
                 {loading ? "Saving..." : "Enter ASCEND"}
               </button>
             </div>

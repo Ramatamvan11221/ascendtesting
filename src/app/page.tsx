@@ -3,35 +3,45 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Users, Sparkles, TrendingUp, Zap, Star, Camera, Mail, Code } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // ─── STYLES ──────────────────────────────────────────────────────────────
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
 
-  :root {
-    --bg-deep: #070c14;
-    --bg-deep-right: #0d0716;
-    --bg-card: rgba(18, 25, 40, 0.55);
-    --text: #edeff2;
-    --text-secondary: #9aa4b8;
-    --text-muted: #5a6478;
-    --border-subtle: rgba(255, 255, 255, 0.04);
-    --amber: #f59e0b;
-    --orange: #f97316;
-    --purple: #8b5cf6;
-  }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: var(--bg-deep);
-    color: var(--text);
+    background: var(--bg-primary);
+    color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
   ::-webkit-scrollbar { width: 0; }
 
   .page-wrap { position: relative; z-index: 1; width: 100%; max-width: 100vw; overflow-x: hidden; }
+
+    /* ── Theme Toggle (landing page) ── */
+  .nav-theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 32px;
+    height: 32px;
+  }
+
+  .nav-theme-toggle:hover {
+    border-color: var(--border-medium);
+    color: var(--text-primary);
+    background: var(--border-subtle);
+  }
 
   /* ── Ambient orbs ── */
   .ambient-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
@@ -57,17 +67,17 @@ const STYLES = `
     padding: 0 16px; transition: all 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
   .nav-bar.scrolled {
-    background: rgba(7, 12, 20, 0.72);
+    background: var(--bg-secondary);
     backdrop-filter: blur(32px) saturate(1.2);
     -webkit-backdrop-filter: blur(32px) saturate(1.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--border-subtle);
   }
   @media (min-width: 768px) { .nav-bar { padding: 0 32px; } }
 
   .nav-inner { max-width: 1200px; margin: 0 auto; height: 60px; display: flex; align-items: center; justify-content: space-between; }
   .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
   .nav-brand-icon { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--amber), var(--orange)); display: flex; align-items: center; justify-content: center; }
-  .nav-brand-text { font-weight: 700; color: var(--text); font-size: 17px; letter-spacing: -0.02em; }
+  .nav-brand-text { font-weight: 700; color: var(--text-primary); font-size: 17px; letter-spacing: -0.02em; }
 
   .btn-ghost-nav {
     color: var(--text-secondary); background: transparent;
@@ -75,7 +85,7 @@ const STYLES = `
     border: none; border-radius: 10px; cursor: pointer;
     transition: all 0.3s ease; text-decoration: none;
   }
-  .btn-ghost-nav:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .btn-ghost-nav:hover { color: var(--text-primary); background: var(--border-subtle); }
 
   /* ── Buttons ── */
   .btn {
@@ -89,18 +99,18 @@ const STYLES = `
   @media (min-width: 480px) { .btn { padding: 15px 34px; font-size: 15px; border-radius: 14px; } }
   .btn-primary {
     background: linear-gradient(135deg, var(--amber), var(--orange));
-    color: #0a0a0a;
+    color: var(--text-inverse);
     box-shadow: 0 20px 50px -20px rgba(245, 158, 11, 0.45);
   }
   .btn-primary:hover { transform: scale(1.03); box-shadow: 0 24px 60px -18px rgba(245, 158, 11, 0.6); }
   .btn-outline {
-    border: 1px solid rgba(255,255,255,0.08);
-    color: var(--text); background: transparent;
+    border: 1px solid var(--border-medium);
+    color: var(--text-primary); background: transparent;
   }
-  .btn-outline:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.18); }
+  .btn-outline:hover { background: var(--border-subtle); border-color: var(--border-strong); }
 
   /* ── Typography ── */
-  .hero-title { font-size: clamp(40px, 9vw, 110px); font-weight: 800; line-height: 0.94; letter-spacing: -0.04em; color: var(--text); }
+  .hero-title { font-size: clamp(40px, 9vw, 110px); font-weight: 800; line-height: 0.94; letter-spacing: -0.04em; color: var(--text-primary); }
   .text-gradient {
     background: linear-gradient(135deg, var(--amber), var(--orange), var(--amber));
     background-size: 300% 300%;
@@ -125,7 +135,7 @@ const STYLES = `
   }
   @media (min-width: 480px) { .section-tag { font-size: 11px; padding: 6px 18px; } }
 
-  .stat-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .stat-value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
   .stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
 
   /* ── Animations ── */
@@ -166,14 +176,14 @@ const STYLES = `
   .hero-split-bg { position: absolute; inset: 0; z-index: 0; }
   .hero-split-panel-left {
     position: absolute; inset: 0;
-    background: var(--bg-deep);
+    background: var(--bg-primary);
     clip-path: polygon(0% 0%, 60% 0%, 52% 18%, 66% 38%, 48% 58%, 62% 78%, 54% 100%, 0% 100%);
   }
   .hero-split-panel-right {
     position: absolute; inset: 0;
     background:
       radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.10), transparent 60%),
-      var(--bg-deep-right);
+      var(--bg-secondary);
     clip-path: polygon(100% 0%, 60% 0%, 52% 18%, 66% 38%, 48% 58%, 62% 78%, 54% 100%, 100% 100%);
   }
   /* thin hot seam line traced along the same jagged path, sitting on top of the cut */
@@ -191,7 +201,7 @@ const STYLES = `
   .hero-content { position: relative; z-index: 15; width: 100%; max-width: 700px; margin: 0 auto; }
   @media (min-width: 1024px) { .hero-content { margin: 0; } }
 
-  .stats-row { display: flex; gap: 32px; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 28px; flex-wrap: wrap; }
+  .stats-row { display: flex; gap: 32px; margin-top: 40px; border-top: 1px solid var(--border-subtle); padding-top: 28px; flex-wrap: wrap; }
   @media (min-width: 480px) { .stats-row { gap: 48px; margin-top: 56px; padding-top: 32px; } }
 
   .features-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
@@ -201,7 +211,7 @@ const STYLES = `
     background: var(--bg-card);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.04);
+    border: 1px solid var(--border-subtle);
     border-radius: 20px;
     overflow: hidden;
     transition: transform 0.4s ease, box-shadow 0.4s ease;
@@ -220,7 +230,7 @@ const STYLES = `
   .testimonial-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(1) saturate(1); }
 
   .avatar-ring { display: flex; margin-top: 20px; }
-  .avatar { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #141e2b; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
   .avatar:not(:first-child) { margin-left: -10px; }
 
   .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 12px; }
@@ -237,7 +247,7 @@ const STYLES = `
     position: absolute;
     border-radius: 16px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid var(--border-subtle);
     box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
     transition: transform 0.3s ease;
     will-change: transform;
@@ -260,7 +270,7 @@ const STYLES = `
   }
   .cube3d .face {
     position: absolute; width: 90px; height: 90px;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid var(--border-subtle);
     background: linear-gradient(135deg, rgba(245,158,11,0.28), rgba(139,92,246,0.22));
     backdrop-filter: blur(2px);
     box-shadow: inset 0 0 30px rgba(245,158,11,0.08);
@@ -317,14 +327,14 @@ const STYLES = `
     display: flex; align-items: center; gap: 14px;
     padding: 18px 20px; border-radius: 16px;
     background: var(--bg-card);
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid var(--border-subtle);
     text-decoration: none;
     transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
   .contact-card:hover { transform: translateY(-4px); border-color: rgba(245,158,11,0.25); box-shadow: 0 20px 40px -24px rgba(245,158,11,0.25); }
   .contact-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .contact-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-  .contact-value { font-size: 14px; color: var(--text); font-weight: 600; }
+  .contact-value { font-size: 14px; color: var(--text-primary); font-weight: 600; }
 `;
 
 // ─── COMPONENTS ──────────────────────────────────────────────────────────
@@ -335,23 +345,28 @@ function Navbar({ scrolled, loggedIn }: { scrolled: boolean; loggedIn: boolean }
       <div className="nav-inner">
         <Link href="/" className="nav-brand">
           <div className="nav-brand-icon">
-            <Zap size={14} style={{ color: "#0a0a0a" }} />
+            <Zap size={14} style={{ color: "var(--text-inverse)" }} />
           </div>
           <span className="nav-brand-text">ASCEND</span>
         </Link>
-        <Link href={loggedIn ? "/dashboard" : "/login"} className="btn-ghost-nav">
-          {loggedIn ? "Dashboard" : "Sign In"}
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <ThemeToggle />
+          <Link href={loggedIn ? "/dashboard" : "/login"} className="btn-ghost-nav">
+            {loggedIn ? "Dashboard" : "Sign In"}
+          </Link>
+        </div>
       </div>
     </nav>
   );
 }
 
+// ─── WAVE DIVIDERS ──────────────────────────────────────────────────
+
 function WaveDivider() {
   return (
     <div className="wave-divider">
       <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-        <path d="M0 24 C360 0, 720 48, 1080 24 C1260 12, 1380 24, 1440 24 L1440 48 L0 48 Z" fill="#0f1923" />
+        <path d="M0 24 C360 0, 720 48, 1080 24 C1260 12, 1380 24, 1440 24 L1440 48 L0 48 Z" fill="var(--bg-tertiary)" />
       </svg>
     </div>
   );
@@ -361,7 +376,7 @@ function WaveDividerDark() {
   return (
     <div className="wave-divider">
       <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-        <path d="M0 24 C360 0, 720 48, 1080 24 C1260 12, 1380 24, 1440 24 L1440 48 L0 48 Z" fill="#141e2b" />
+        <path d="M0 24 C360 0, 720 48, 1080 24 C1260 12, 1380 24, 1440 24 L1440 48 L0 48 Z" fill="var(--bg-secondary)" />
       </svg>
     </div>
   );
@@ -371,7 +386,7 @@ function WaveDividerDeep() {
   return (
     <div className="wave-divider">
       <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-        <path d="M0 24 C360 0, 720 48, 1080 24 C1260 12, 1380 24, 1440 24 L1440 48 L0 48 Z" fill="#070c14" />
+        <path d="M0 24 C360 0, 720 48, 1080 24 C1260 12, 1380 24, 1440 24 L1440 48 L0 48 Z" fill="var(--bg-primary)" />
       </svg>
     </div>
   );
@@ -451,7 +466,7 @@ export default function LandingPage() {
           <div className="hero-content">
             <div className="afi" style={{ marginBottom: "20px" }}>
               <span className="section-tag">
-                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#f59e0b", display: "inline-block", marginRight: "6px" }} />
+                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--amber)", display: "inline-block", marginRight: "6px" }} />
                 PARTNER FOR AMBITIOUS PEOPLE
               </span>
             </div>
@@ -463,7 +478,7 @@ export default function LandingPage() {
               <span className="hero-word text-gradient">FUTURE.</span>
             </h1>
 
-            <p className="afu d3" style={{ fontSize: "15px", fontWeight: 300, color: "#9aa4b8", maxWidth: "440px", margin: "20px 0 28px", lineHeight: 1.7 }}>
+            <p className="afu d3" style={{ fontSize: "15px", fontWeight: 300, color: "var(--text-secondary)", maxWidth: "440px", margin: "20px 0 28px", lineHeight: 1.7 }}>
               ASCEND connects ambitious individuals with like-minded communities. AI-powered roadmaps, realtime collaboration, and the accountability to rise together.
             </p>
 
@@ -518,21 +533,21 @@ export default function LandingPage() {
         <WaveDivider />
 
         {/* ─── FEATURES ────────────────────────────────────────────── */}
-        <section className="section-pad" style={{ background: "#0f1923", position: "relative", overflow: "hidden" }}>
+        <section className="section-pad" style={{ background: "var(--bg-tertiary)", position: "relative", overflow: "hidden" }}>
           <div className="shard3d" style={{ position: "absolute", top: "6%", right: "6%", opacity: 0.2 }} />
           <div style={{ maxWidth: "1100px", margin: "0 auto", position: "relative" }}>
             <div style={{ textAlign: "center", marginBottom: "40px" }}>
               <span className="section-tag afi">Why ASCEND</span>
-              <h2 className="display-text afu" style={{ color: "#edeff2", marginTop: "12px", fontStyle: "normal", fontWeight: 700, fontSize: "clamp(28px, 5vw, 48px)" }}>
+              <h2 className="display-text afu" style={{ color: "var(--text-primary)", marginTop: "12px", fontStyle: "normal", fontWeight: 700, fontSize: "clamp(28px, 5vw, 48px)" }}>
                 Everything you need to <span className="text-gradient">rise</span>
               </h2>
             </div>
 
             <div className="features-grid">
               {[
-                { icon: Users, color: "#f59e0b", title: "Find Your Squad", desc: "Connect with people who share your exact goals. No more lonely grinding.", img: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80" },
-                { icon: Sparkles, color: "#f97316", title: "AI Roadmap", desc: "Advanced AI creates your personalized step-by-step journey.", img: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" },
-                { icon: TrendingUp, color: "#8b5cf6", title: "Grow Together", desc: "Shared tasks, real-time accountability, and celebration moments.", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80" },
+                { icon: Users, color: "var(--amber)", title: "Find Your Squad", desc: "Connect with people who share your exact goals. No more lonely grinding.", img: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80" },
+                { icon: Sparkles, color: "var(--orange)", title: "AI Roadmap", desc: "Advanced AI creates your personalized step-by-step journey.", img: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" },
+                { icon: TrendingUp, color: "var(--purple)", title: "Grow Together", desc: "Shared tasks, real-time accountability, and celebration moments.", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80" },
               ].map((f, i) => (
                 <div key={f.title} className={`feature-card sr sr-delay-${i + 1}`}>
                   <div className="feature-img">
@@ -542,35 +557,34 @@ export default function LandingPage() {
                     <div className="feature-icon" style={{ background: `${f.color}18` }}>
                       <f.icon size={20} style={{ color: f.color }} />
                     </div>
-                    <h3 style={{ fontSize: "17px", fontWeight: 600, color: "#edeff2", marginBottom: "6px" }}>{f.title}</h3>
-                    <p style={{ fontSize: "13px", color: "#9aa4b8", lineHeight: 1.6, fontWeight: 300 }}>{f.desc}</p>
+                    <h3 style={{ fontSize: "17px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "6px" }}>{f.title}</h3>
+                    <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.6, fontWeight: 300 }}>{f.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
-
         <WaveDividerDark />
 
         {/* ─── TESTIMONIAL ──────────────────────────────────────────── */}
-        <section className="section-pad" style={{ background: "#141e2b" }}>
+        <section className="section-pad" style={{ background: "var(--bg-secondary)" }}>
           <div style={{ maxWidth: "1100px", margin: "0 auto" }} className="testimonial-grid">
             <div className="sr">
               <span className="section-tag">Testimonial</span>
-              <p className="display-text" style={{ color: "#edeff2", marginTop: "14px" }}>
+              <p className="display-text" style={{ color: "var(--text-primary)", marginTop: "14px" }}>
                 &ldquo;ASCEND helped me find my people. Now I&apos;m not chasing dreams alone.&rdquo;
               </p>
               <div style={{ marginTop: "16px" }}>
-                <p style={{ fontWeight: 600, color: "#edeff2", fontSize: "15px" }}>Rama, 19</p>
-                <p style={{ fontSize: "12px", color: "#5a6478" }}>Pejuang UGM 2026</p>
+                <p style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "15px" }}>Rama, 19</p>
+                <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>Pejuang UGM 2026</p>
               </div>
               <div className="avatar-ring">
                 {["#f59e0b","#f97316","#ef4444","#8b5cf6","#06b6d4","#10b981","#3b82f6","#ec4899"].map((c, i) => (
                   <div key={i} className="avatar" style={{ background: c }}>{String.fromCharCode(65 + i)}</div>
                 ))}
               </div>
-              <p style={{ fontSize: "12px", color: "#5a6478", marginTop: "10px" }}>Joined by 4,800+ dreamers</p>
+              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "10px" }}>Joined by 4,800+ dreamers</p>
             </div>
             <div className="testimonial-img sr sr-delay-1">
               <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80" alt="Community" />
@@ -581,7 +595,7 @@ export default function LandingPage() {
         <WaveDividerDeep />
 
         {/* ─── CTA ──────────────────────────────────────────────────── */}
-        <section className="section-pad" style={{ background: "#070c14", textAlign: "center", position: "relative", overflow: "hidden" }}>
+        <section className="section-pad" style={{ background: "var(--bg-primary)", textAlign: "center", position: "relative", overflow: "hidden" }}>
           <div className="scene3d" style={{ top: "8%", left: "6%", display: isDesktop ? "block" : "none" }}>
             <div className="ring3d" style={{ width: "100px", height: "100px" }} />
           </div>
@@ -589,37 +603,36 @@ export default function LandingPage() {
             <div className="asi" style={{ marginBottom: "24px" }}>
               <div style={{
                 width: "56px", height: "56px", borderRadius: "16px",
-                background: "linear-gradient(135deg, #f59e0b, #f97316)",
+                background: "linear-gradient(135deg, var(--amber), var(--orange))",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 margin: "0 auto", boxShadow: "0 20px 40px -16px rgba(245,158,11,0.4)"
               }}>
-                <Star size={24} style={{ color: "#0a0a0a" }} />
+                <Star size={24} style={{ color: "var(--text-inverse)" }} />
               </div>
             </div>
             <h2 className="hero-title" style={{ fontSize: "clamp(36px, 8vw, 72px)" }}>
               READY TO<br /><span className="text-gradient">ASCEND?</span>
             </h2>
-            <p style={{ fontSize: "14px", color: "#9aa4b8", maxWidth: "360px", margin: "18px auto 28px", lineHeight: 1.6, fontWeight: 300 }}>
+            <p style={{ fontSize: "14px", color: "var(--text-secondary)", maxWidth: "360px", margin: "18px auto 28px", lineHeight: 1.6, fontWeight: 300 }}>
               Join thousands of ambitious individuals already building their future on ASCEND.
             </p>
             <Link href={ctaLink} className="btn btn-primary" style={{ padding: "15px 36px", fontSize: "15px" }}>
               <ArrowRight size={16} /> {loggedIn ? "Dashboard" : "Enter ASCEND"}
             </Link>
-            <p style={{ marginTop: "20px", fontSize: "12px", color: "#5a6478" }}>Find Your People. Build Your Future.</p>
+            <p style={{ marginTop: "20px", fontSize: "12px", color: "var(--text-muted)" }}>Find Your People. Build Your Future.</p>
           </div>
         </section>
 
         {/* ─── CONTACT ──────────────────────────────────────────────── */}
-        <section className="section-pad sr" style={{ background: "#04070a", paddingBottom: "48px" }}>
+        <section className="section-pad sr" style={{ background: "var(--bg-secondary)", paddingBottom: "48px" }}>
           <div style={{ maxWidth: "900px", margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: "28px" }}>
               <span className="section-tag">Get In Touch</span>
-              <h3 style={{ fontSize: "20px", fontWeight: 700, color: "#edeff2", marginTop: "12px" }}>
+              <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginTop: "12px" }}>
                 Talk to the team behind ASCEND
               </h3>
             </div>
             <div className="contact-grid">
-              {/* TODO: ganti href & value di bawah dengan akun/kontak asli */}
               <a href="https://instagram.com/ascend.id" target="_blank" rel="noopener noreferrer" className="contact-card">
                 <div className="contact-icon" style={{ background: "rgba(236,72,153,0.14)" }}>
                   <Camera size={18} style={{ color: "#ec4899" }} />
@@ -631,7 +644,7 @@ export default function LandingPage() {
               </a>
               <a href="mailto:hello@ascend.app" className="contact-card">
                 <div className="contact-icon" style={{ background: "rgba(245,158,11,0.14)" }}>
-                  <Mail size={18} style={{ color: "#f59e0b" }} />
+                  <Mail size={18} style={{ color: "var(--amber)" }} />
                 </div>
                 <div>
                   <p className="contact-label">Email</p>
@@ -640,7 +653,7 @@ export default function LandingPage() {
               </a>
               <a href="https://github.com/ascend-dev" target="_blank" rel="noopener noreferrer" className="contact-card">
                 <div className="contact-icon" style={{ background: "rgba(139,92,246,0.14)" }}>
-                  <Code size={18} style={{ color: "#8b5cf6" }} />
+                  <Code size={18} style={{ color: "var(--purple)" }} />
                 </div>
                 <div>
                   <p className="contact-label">Developer</p>
@@ -652,19 +665,19 @@ export default function LandingPage() {
         </section>
 
         {/* ─── FOOTER ────────────────────────────────────────────────── */}
-        <footer className="sr" style={{ padding: "28px 16px", background: "#04070a", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
+        <footer className="sr" style={{ padding: "28px 16px", background: "var(--bg-primary)", borderTop: "1px solid var(--border-subtle)" }}>
           <div className="footer-inner" style={{ maxWidth: "1100px", margin: "0 auto" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div style={{ width: "18px", height: "18px", borderRadius: "4px", background: "linear-gradient(135deg, #f59e0b, #f97316)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Zap size={9} style={{ color: "#0a0a0a" }} />
+              <div style={{ width: "18px", height: "18px", borderRadius: "4px", background: "linear-gradient(135deg, var(--amber), var(--orange))", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Zap size={9} style={{ color: "var(--text-inverse)" }} />
               </div>
-              <span style={{ fontSize: "11px", color: "#5a6478" }}>ASCEND — Find Your People. Build Your Future.</span>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>ASCEND — Find Your People. Build Your Future.</span>
             </div>
             <div style={{ display: "flex", gap: "16px" }}>
-              <Link href={signInLink} style={{ fontSize: "11px", color: "#5a6478", textDecoration: "none" }}>
+              <Link href={signInLink} style={{ fontSize: "11px", color: "var(--text-muted)", textDecoration: "none" }}>
                 {loggedIn ? "Dashboard" : "Sign In"}
               </Link>
-              <Link href={ctaLink} style={{ fontSize: "11px", color: "#9aa4b8", textDecoration: "none" }}>
+              <Link href={ctaLink} style={{ fontSize: "11px", color: "var(--text-secondary)", textDecoration: "none" }}>
                 {loggedIn ? "Dashboard" : "Get Started"}
               </Link>
             </div>

@@ -12,6 +12,21 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
 
+  const handleToggle = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    
+    // Tambah class transition
+    document.documentElement.classList.add('theme-transitioning');
+    
+    // Ganti theme
+    setTheme(newTheme);
+    
+    // Hapus class setelah transisi selesai
+    setTimeout(() => {
+      document.documentElement.classList.remove('theme-transitioning');
+    }, 400);
+  };
+
   if (!mounted) {
     return (
       <button className="theme-toggle-btn" aria-label="Toggle theme">
@@ -22,7 +37,7 @@ export function ThemeToggle() {
 
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={handleToggle}
       className="theme-toggle-btn"
       aria-label="Toggle theme"
     >

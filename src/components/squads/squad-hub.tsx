@@ -12,38 +12,38 @@ import { LoadingScreen } from "@/components/ui/loading-screen";
 
 const STYLES = `
   .hub-root{display:flex;height:100%;width:100%;}
-  .hub-sidebar{height:100%;position:relative;z-index:1;flex-shrink:0;display:flex;flex-direction:column;background:rgba(13,18,28,0.92);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-right:1px solid rgba(255,255,255,0.04);transition:width 0.35s cubic-bezier(0.22,0.61,0.36,1);width:220px;}
+  .hub-sidebar{height:100%;position:relative;z-index:1;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-secondary);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-right:1px solid var(--border-subtle);transition:width 0.35s cubic-bezier(0.22,0.61,0.36,1);width:220px;}
   .hub-sidebar.collapsed{width:72px;}
   @media(max-width:1023px){.hub-sidebar{position:fixed;top:0;left:0;bottom:0;z-index:50;width:260px;transform:translateX(-100%);}.hub-sidebar.mobile-open{transform:translateX(0);box-shadow:20px 0 60px rgba(0,0,0,0.5);}}
-  .hub-sb-header{display:flex;align-items:center;justify-content:space-between;padding:18px;border-bottom:1px solid rgba(255,255,255,0.04);min-height:64px;}
+  .hub-sb-header{display:flex;align-items:center;justify-content:space-between;padding:18px;border-bottom:1px solid var(--border-subtle);min-height:64px;}
   .hub-sb-title-wrap{display:flex;align-items:center;gap:10px;overflow:hidden;}
-  .hub-sb-logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 20px -8px rgba(245,158,11,0.3);}
-  .hub-sb-title{font-weight:700;color:#edeff2;font-size:17px;letter-spacing:0.03em;white-space:nowrap;}
-  .hub-sb-collapse{background:none;border:none;color:#5a6478;cursor:pointer;padding:6px;border-radius:8px;transition:all 0.3s;display:flex;align-items:center;justify-content:center;}
-  .hub-sb-collapse:hover{color:#f59e0b;background:rgba(245,158,11,0.06);}
+  .hub-sb-logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--amber),var(--orange));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 20px -8px rgba(245,158,11,0.3);}
+  .hub-sb-title{font-weight:700;color:var(--text-primary);font-size:17px;letter-spacing:0.03em;white-space:nowrap;}
+  .hub-sb-collapse{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:6px;border-radius:8px;transition:all 0.3s;display:flex;align-items:center;justify-content:center;}
+  .hub-sb-collapse:hover{color:var(--amber);background:rgba(245,158,11,0.06);}
   .hub-collapse-icon{transition:transform 0.35s ease;}
   .hub-collapse-icon.flipped{transform:rotate(180deg);}
   .hub-sb-nav{flex:1;padding:14px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;}
-  .hub-sb-section-title{font-size:10px;font-weight:600;color:#5a6478;text-transform:uppercase;letter-spacing:0.1em;padding:8px 14px 4px;}
-  .hub-sb-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:500;color:#9aa4b8;transition:all 0.3s ease;position:relative;white-space:nowrap;border:none;background:none;width:100%;text-align:left;font-family:'Inter',sans-serif;cursor:pointer;}
-  .hub-sb-item:hover{color:#edeff2;background:rgba(255,255,255,0.02);}
-  .hub-sb-item.active{color:#f59e0b;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.12);box-shadow:0 0 20px rgba(245,158,11,0.04);}
-  .hub-sb-item.active::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:2px;background:#f59e0b;border-radius:0 2px 2px 0;}
-  .hub-sb-item.danger{color:#5a6478;}
-  .hub-sb-item.danger:hover{color:#ef4444;background:rgba(239,68,68,0.04);}
+  .hub-sb-section-title{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;padding:8px 14px 4px;}
+  .hub-sb-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:500;color:var(--text-secondary);transition:all 0.3s ease;position:relative;white-space:nowrap;border:none;background:none;width:100%;text-align:left;font-family:'Inter',sans-serif;cursor:pointer;}
+  .hub-sb-item:hover{color:var(--text-primary);background:var(--border-subtle);}
+  .hub-sb-item.active{color:var(--amber);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.12);box-shadow:0 0 20px rgba(245,158,11,0.04);}
+  .hub-sb-item.active::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:2px;background:var(--amber);border-radius:0 2px 2px 0;}
+  .hub-sb-item.danger{color:var(--text-muted);}
+  .hub-sb-item.danger:hover{color:var(--red);background:rgba(239,68,68,0.04);}
   .hub-sb-item.disabled{opacity:0.5;cursor:not-allowed;pointer-events:none;}
-  .hub-sb-item .lock-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#5a6478;font-size:12px;}
+  .hub-sb-item .lock-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:12px;}
   .hub-sb-icon{flex-shrink:0;}
   .hub-sidebar.collapsed .hub-sb-item{justify-content:center;padding:10px;}
   .hub-sidebar.collapsed .hub-sb-item::before{display:none;}
   .hub-sidebar.collapsed .hub-sb-item .lock-icon{display:none;}
-  .notif-badge{background:#ef4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:999px;font-weight:600;margin-left:auto;}
+  .notif-badge{background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:999px;font-weight:600;margin-left:auto;}
   .hub-sidebar.collapsed .notif-badge{position:absolute;top:4px;right:4px;margin-left:0;}
-  .hub-sb-bottom{padding:14px 10px;border-top:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:6px;margin-top:auto;}
-  .hub-sb-leave{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:400;color:#5a6478;transition:all 0.3s;width:100%;font-family:'Inter',sans-serif;}
-  .hub-sb-leave:hover{color:#ef4444;background:rgba(239,68,68,0.04);}
+  .hub-sb-bottom{padding:14px 10px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:6px;margin-top:auto;}
+  .hub-sb-leave{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:400;color:var(--text-muted);transition:all 0.3s;width:100%;font-family:'Inter',sans-serif;}
+  .hub-sb-leave:hover{color:var(--red);background:rgba(239,68,68,0.04);}
   .hub-sidebar.collapsed .hub-sb-leave{justify-content:center;padding:10px;}
-  .hub-main{flex:1;min-width:0;overflow-y:auto;background:#0a0f18;display:flex;flex-direction:column;}
+  .hub-main{flex:1;min-width:0;overflow-y:auto;background:var(--bg-primary);display:flex;flex-direction:column;}
   
   .sidebar-toggle {
     position: fixed;
@@ -59,7 +59,7 @@ const STYLES = `
     border: 1px solid rgba(245,158,11,0.2);
     border-left: none;
     border-radius: 0 10px 10px 0;
-    color: #f59e0b;
+    color: var(--amber);
     cursor: pointer;
     display: none;
     align-items: center;
@@ -87,56 +87,56 @@ const STYLES = `
     } 
   }
 
-  .mobile-overlay{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,0.5);}
+  .mobile-overlay{position:fixed;inset:0;z-index:40;background:var(--bg-overlay);}
   @media(min-width:1024px){.mobile-overlay{display:none;}}
   
-  .hub-header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.04);background:rgba(10,15,24,0.8);backdrop-filter:blur(12px);flex-shrink:0;}
-  .hub-header-name{font-size:15px;font-weight:600;color:#edeff2;}
+  .hub-header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border-subtle);background:var(--bg-secondary);backdrop-filter:blur(12px);flex-shrink:0;}
+  .hub-header-name{font-size:15px;font-weight:600;color:var(--text-primary);}
   .members-grid{display:grid;grid-template-columns:1fr;gap:4px;padding:10px 12px;}
   @media(min-width:600px){.members-grid{grid-template-columns:1fr 1fr;gap:6px;padding:12px 16px;}}
-  .member-card{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);transition:all 0.25s;background:rgba(18,25,40,0.4);backdrop-filter:blur(10px);}
-  .member-card:hover{background:rgba(22,30,46,0.5);border-color:rgba(255,255,255,0.06);}
-  .member-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;background:rgba(245,158,11,0.1);color:#f59e0b;flex-shrink:0;}
+  .member-card{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:12px;border:1px solid var(--border-subtle);transition:all 0.25s;background:var(--bg-card);backdrop-filter:blur(10px);}
+  .member-card:hover{background:var(--bg-card-hover);border-color:var(--border-medium);}
+  .member-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;background:rgba(245,158,11,0.1);color:var(--amber);flex-shrink:0;}
   .member-info{flex:1;min-width:0;}
-  .member-name{font-size:13px;font-weight:600;color:#edeff2;display:flex;align-items:center;gap:6px;}
+  .member-name{font-size:13px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:6px;}
   .member-role{font-size:9px;font-weight:600;padding:2px 6px;border-radius:999px;}
-  .member-role.owner{background:rgba(245,158,11,0.12);color:#f59e0b;}
+  .member-role.owner{background:rgba(245,158,11,0.12);color:var(--amber);}
   .member-role.mod{background:rgba(99,102,241,0.12);color:#818cf8;}
-  .member-goal{font-size:10px;color:#5a6478;margin-top:1px;}
+  .member-goal{font-size:10px;color:var(--text-muted);margin-top:1px;}
   .notif-list{display:flex;flex-direction:column;gap:2px;padding:10px 12px;}
-  .notif-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);background:rgba(18,25,40,0.3);backdrop-filter:blur(10px);}
+  .notif-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-subtle);background:var(--bg-card);backdrop-filter:blur(10px);}
   .notif-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;font-weight:700;}
-  .notif-icon.join{background:rgba(16,185,129,0.1);color:#10b981;}
-  .notif-text{font-size:12px;color:#edeff2;flex:1;}
-  .notif-time{font-size:10px;color:#5a6478;flex-shrink:0;}
-  .pagination-row{display:flex;align-items:center;justify-content:center;gap:4px;padding:10px;border-top:1px solid rgba(255,255,255,0.04);}
-  .page-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);color:#5a6478;font-size:11px;}
-  .page-btn:hover{color:#f59e0b;border-color:rgba(245,158,11,0.3);}
+  .notif-icon.join{background:rgba(16,185,129,0.1);color:var(--green);}
+  .notif-text{font-size:12px;color:var(--text-primary);flex:1;}
+  .notif-time{font-size:10px;color:var(--text-muted);flex-shrink:0;}
+  .pagination-row{display:flex;align-items:center;justify-content:center;gap:4px;padding:10px;border-top:1px solid var(--border-subtle);}
+  .page-btn{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;background:var(--bg-input);border:1px solid var(--border-subtle);color:var(--text-muted);font-size:11px;}
+  .page-btn:hover{color:var(--amber);border-color:rgba(245,158,11,0.3);}
   .page-btn:disabled{opacity:0.3;cursor:not-allowed;}
-  .page-btn.active{background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.3);color:#f59e0b;}
-  .page-info{font-size:11px;color:#5a6478;margin:0 8px;}
-  .empty-state{text-align:center;padding:60px 20px;color:#5a6478;}
+  .page-btn.active{background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.3);color:var(--amber);}
+  .page-info{font-size:11px;color:var(--text-muted);margin:0 8px;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted);}
   
   .welcome-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;}
   .welcome-icon{font-size:56px;margin-bottom:16px;opacity:0.6;}
-  .welcome-title{font-size:22px;font-weight:700;color:#edeff2;margin-bottom:8px;}
-  .welcome-desc{font-size:13px;color:#5a6478;max-width:400px;line-height:1.6;margin-bottom:24px;}
-  .welcome-btn{padding:14px 32px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#f59e0b,#f97316);color:#0a0a0a;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;box-shadow:0 12px 30px -8px rgba(245,158,11,0.3);display:flex;align-items:center;gap:8px;transition:all 0.3s;}
+  .welcome-title{font-size:22px;font-weight:700;color:var(--text-primary);margin-bottom:8px;}
+  .welcome-desc{font-size:13px;color:var(--text-muted);max-width:400px;line-height:1.6;margin-bottom:24px;}
+  .welcome-btn{padding:14px 32px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--amber),var(--orange));color:var(--text-inverse);font-size:14px;font-weight:600;font-family:'Inter',sans-serif;box-shadow:0 12px 30px -8px rgba(245,158,11,0.3);display:flex;align-items:center;gap:8px;transition:all 0.3s;}
   .welcome-btn:hover{transform:scale(1.03);}
   
-  .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:16px;}
-  .modal-card{width:100%;max-width:400px;border-radius:18px;background:rgba(15,22,36,0.95);border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(20px);padding:24px 20px;}
-  .modal-title{font-size:18px;font-weight:700;color:#edeff2;margin-bottom:16px;}
-  .modal-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:#edeff2;font-size:13px;outline:none;font-family:'Inter',sans-serif;margin-bottom:12px;}
+  .modal-overlay{position:fixed;inset:0;z-index:100;background:var(--bg-overlay);display:flex;align-items:center;justify-content:center;padding:16px;}
+  .modal-card{width:100%;max-width:400px;border-radius:18px;background:var(--bg-card);border:1px solid var(--border-medium);backdrop-filter:blur(20px);padding:24px 20px;}
+  .modal-title{font-size:18px;font-weight:700;color:var(--text-primary);margin-bottom:16px;}
+  .modal-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border-medium);background:var(--bg-input);color:var(--text-primary);font-size:13px;outline:none;font-family:'Inter',sans-serif;margin-bottom:12px;}
   .modal-input:focus{border-color:rgba(245,158,11,0.4);}
   .modal-type-row{display:flex;gap:8px;margin-bottom:16px;}
-  .modal-type-opt{flex:1;padding:14px 8px;border-radius:10px;border:2px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.015);cursor:pointer;text-align:center;transition:all 0.2s;}
+  .modal-type-opt{flex:1;padding:14px 8px;border-radius:10px;border:2px solid var(--border-subtle);background:var(--bg-input);cursor:pointer;text-align:center;transition:all 0.2s;}
   .modal-type-opt:hover{border-color:rgba(245,158,11,0.3);}
   .modal-type-opt.sel{border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.06);}
   .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
   .modal-btn{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;}
-  .modal-btn-cancel{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#9aa4b8;}
-  .modal-btn-create{background:linear-gradient(135deg,#f59e0b,#f97316);border:none;color:#0a0a0a;}
+  .modal-btn-cancel{background:var(--bg-input);border:1px solid var(--border-medium);color:var(--text-secondary);}
+  .modal-btn-create{background:linear-gradient(135deg,var(--amber),var(--orange));border:none;color:var(--text-inverse);}
   .modal-btn-create:hover{transform:scale(1.03);}
   .modal-btn-create:disabled{opacity:0.4;cursor:not-allowed;}
 
@@ -200,7 +200,6 @@ export function SquadHub({
   useEffect(() => {
     if (isNewSquad && !hasShownModal && rooms.length === 0) {
       setHasShownModal(true);
-      // Delay sedikit biar UI kebaca dulu
       setTimeout(() => {
         setShowCreateModal(true);
       }, 500);
@@ -244,7 +243,6 @@ export function SquadHub({
   const hasNoRooms = rooms.length === 0;
 
   const handleViewChange = (view: string, roomId?: string) => {
-    // Block navigation if no rooms
     if (hasNoRooms && view !== "welcome") {
       toast.warning("Create a room first!");
       return;
@@ -336,16 +334,16 @@ export function SquadHub({
             <Plus size={18} /> {hasNoRooms ? "Create Your First Room" : "Create Room"}
           </button>
         ) : (
-          <p style={{ color: "#5a6478", fontSize: "13px" }}>Ask the owner to create a room.</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>Ask the owner to create a room.</p>
         )}
       </div>
     );
     if (activeView === "chat" && activeRoom) return <ChatRoom roomId={activeRoom.id} roomName={activeRoom.name} currentUserId={currentUserId} currentUserName={currentUserName} />;
     if (activeView === "study" && activeRoom) return <StudyRoom roomId={activeRoom.id} roomName={activeRoom.name} currentUserId={currentUserId} currentUserName={currentUserName} isOwner={isOwner} squadId={squadId} />;
-    if (activeView === "tasks") return <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}><div className="hub-header"><Target size={18} style={{ color: "#f59e0b" }} /><span className="hub-header-name">Squad Tasks</span></div><div style={{ padding: "20px" }}><SquadTasks squadId={squadId} isMember={isMember} /></div></div>;
+    if (activeView === "tasks") return <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}><div className="hub-header"><Target size={18} style={{ color: "var(--amber)" }} /><span className="hub-header-name">Squad Tasks</span></div><div style={{ padding: "20px" }}><SquadTasks squadId={squadId} isMember={isMember} /></div></div>;
     if (activeView === "members") return (
       <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}>
-        <div className="hub-header"><Users size={18} style={{ color: "#f59e0b" }} /><span className="hub-header-name">Members ({localMembers.length})</span></div>
+        <div className="hub-header"><Users size={18} style={{ color: "var(--amber)" }} /><span className="hub-header-name">Members ({localMembers.length})</span></div>
         <div className="members-grid">
           {paginatedMembers.map((m) => (
             <div key={m.id} className="member-card">
@@ -358,7 +356,7 @@ export function SquadHub({
                 <div style={{ display: "flex", gap: "3px", flexShrink: 0 }}>
                   {isOwner && m.role !== "MODERATOR" && <button className="page-btn" onClick={() => handlePromote(m.id, "MODERATOR")} style={{ fontSize: "9px", padding: "3px 6px" }}><Shield size={9} /></button>}
                   {isOwner && m.role === "MODERATOR" && <button className="page-btn" onClick={() => handlePromote(m.id, "MEMBER")} style={{ fontSize: "9px", padding: "3px 6px" }}>Demote</button>}
-                  <button className="page-btn" onClick={() => handleKick(m.id)} style={{ fontSize: "9px", padding: "3px 6px", color: "#ef4444" }}><Trash2 size={9} /></button>
+                  <button className="page-btn" onClick={() => handleKick(m.id)} style={{ fontSize: "9px", padding: "3px 6px", color: "var(--red)" }}><Trash2 size={9} /></button>
                 </div>
               )}
             </div>
@@ -376,7 +374,7 @@ export function SquadHub({
     );
     if (activeView === "notifications") return (
       <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}>
-        <div className="hub-header"><Bell size={18} style={{ color: "#f59e0b" }} /><span className="hub-header-name">Notifications</span></div>
+        <div className="hub-header"><Bell size={18} style={{ color: "var(--amber)" }} /><span className="hub-header-name">Notifications</span></div>
         <div style={{ flex: 1, overflow: "auto" }}>
           {notifications.length === 0 ? <div className="empty-state"><Bell size={44} style={{ opacity: 0.12, marginBottom: "12px" }} /><p style={{ fontSize: "15px", fontWeight: 500 }}>No notifications yet</p></div> :
             <div className="notif-list">{notifications.map((n) => <div key={n.id} className="notif-item"><div className={`notif-icon ${n.type || "join"}`}>{n.type === "join" ? "+" : "i"}</div><p className="notif-text">{n.text}</p><span className="notif-time">{n.time}</span></div>)}</div>
@@ -396,7 +394,7 @@ export function SquadHub({
       {showCreateModal && (
         <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setShowCreateModal(false)}>
           <motion.div className="modal-card" initial={{ scale: 0.95 }} animate={{ scale: 1 }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="modal-title"><Sparkles size={16} style={{ color: "#f59e0b", marginRight: "6px", display: "inline" }} />
+            <h3 className="modal-title"><Sparkles size={16} style={{ color: "var(--amber)", marginRight: "6px", display: "inline" }} />
               {isNewSquad && rooms.length === 0 ? "Create Your First Room 🚀" : "Create Room"}
             </h3>
             <input className="modal-input" placeholder="Room name..." value={newRoomName} onChange={(e) => setNewRoomName(e.target.value)} autoFocus />
@@ -406,8 +404,8 @@ export function SquadHub({
                 onClick={() => setNewRoomType("CHAT")}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
               >
-                <MessageCircle size={24} style={{ color: newRoomType === "CHAT" ? "#f59e0b" : "#5a6478", marginBottom: "6px" }} />
-                <div style={{ fontSize: "11px", fontWeight: 600, color: "#edeff2" }}>Chat Room</div>
+                <MessageCircle size={24} style={{ color: newRoomType === "CHAT" ? "var(--amber)" : "var(--text-muted)", marginBottom: "6px" }} />
+                <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>Chat Room</div>
               </div>
                     
               <div 
@@ -415,8 +413,8 @@ export function SquadHub({
                 onClick={() => setNewRoomType("STUDY")}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
               >
-                <BookOpen size={24} style={{ color: newRoomType === "STUDY" ? "#f59e0b" : "#5a6478", marginBottom: "6px" }} />
-                <div style={{ fontSize: "11px", fontWeight: 600, color: "#edeff2" }}>Study Room</div>
+                <BookOpen size={24} style={{ color: newRoomType === "STUDY" ? "var(--amber)" : "var(--text-muted)", marginBottom: "6px" }} />
+                <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-primary)" }}>Study Room</div>
               </div>
             </div>
             <div className="modal-actions"><button className="modal-btn modal-btn-cancel" onClick={() => setShowCreateModal(false)}>Cancel</button><button className="modal-btn modal-btn-create" onClick={handleCreateRoom} disabled={creating || !newRoomName.trim()}>{creating ? "Creating..." : "Create"}</button></div>
@@ -427,21 +425,21 @@ export function SquadHub({
       <div className="hub-root">
         <aside className={`hub-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
           <div className="hub-sb-header">
-            <div className="hub-sb-title-wrap"><div className="hub-sb-logo"><Crown size={15} style={{ color: "#0a0a0a" }} /></div>{!collapsed && <span className="hub-sb-title">{squadName}</span>}</div>
+            <div className="hub-sb-title-wrap"><div className="hub-sb-logo"><Crown size={15} style={{ color: "var(--text-inverse)" }} /></div>{!collapsed && <span className="hub-sb-title">{squadName}</span>}</div>
             <button className="hub-sb-collapse mobile-close" onClick={() => setMobileOpen(false)}><ChevronLeft size={16} /></button>
             <button className="hub-sb-collapse desktop-collapse" onClick={() => setCollapsed(!collapsed)}><ChevronLeft size={16} className={`hub-collapse-icon ${collapsed ? 'flipped' : ''}`} /></button>
           </div>
           <nav className="hub-sb-nav">
             <p className="hub-sb-section-title">Rooms</p>
             {rooms.length === 0 ? (
-              <div style={{ padding: "8px 14px", color: "#5a6478", fontSize: "11px", fontStyle: "italic" }}>
+              <div style={{ padding: "8px 14px", color: "var(--text-muted)", fontSize: "11px", fontStyle: "italic" }}>
                 No rooms yet. Create one!
               </div>
             ) : (
               rooms.map((room) => (
                 <button key={room.id} className={`hub-sb-item ${activeRoomId === room.id ? "active" : ""}`} onClick={() => { setActiveRoomId(room.id); setActiveView(room.type === "CHAT" ? "chat" : "study"); setMobileOpen(false); }}>
                   {room.type === "CHAT" ? <MessageCircle size={19} className="hub-sb-icon" /> : <BookOpen size={19} className="hub-sb-icon" />}{!collapsed && <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{room.name}</span>}
-                  {canManage && !collapsed && <span onClick={(e) => { e.stopPropagation(); handleDeleteRoom(room.id); }} style={{ marginLeft: "auto", color: "#5a6478", cursor: "pointer", fontSize: "14px", opacity: 0, transition: "opacity 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.opacity = "1"} onMouseLeave={(e) => e.currentTarget.style.opacity = "0"}>🗑️</span>}
+                  {canManage && !collapsed && <span onClick={(e) => { e.stopPropagation(); handleDeleteRoom(room.id); }} style={{ marginLeft: "auto", color: "var(--text-muted)", cursor: "pointer", fontSize: "14px", opacity: 0, transition: "opacity 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.opacity = "1"} onMouseLeave={(e) => e.currentTarget.style.opacity = "0"}>🗑️</span>}
                 </button>
               ))
             )}
@@ -484,12 +482,12 @@ export function SquadHub({
                 <button 
                   className="hub-sb-leave" 
                   onClick={handleDeleteSquad}
-                  style={{ color: "#ef4444" }}
+                  style={{ color: "var(--red)" }}
                 >
                   <Trash2 size={17} />
                   {!collapsed && <span>Delete Squad</span>}
                 </button>
-                <div style={{ height: "1px", background: "rgba(255,255,255,0.04)", margin: "4px 0" }} />
+                <div style={{ height: "1px", background: "var(--border-subtle)", margin: "4px 0" }} />
               </>
             ) : (
               <button className="hub-sb-leave" onClick={handleLeaveSquad}>
@@ -501,7 +499,6 @@ export function SquadHub({
         </aside>
         
         <main className={`hub-main ${collapsed ? 'sidebar-collapsed' : ''}`}>
-          {/* Banner kalo belum ada room */}
           {hasNoRooms && (
             <div className="required-banner">
               <AlertCircle size={16} />
