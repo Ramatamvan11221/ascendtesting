@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,7 +7,6 @@ import { toast } from "sonner";
 
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
-
   :root {
     --bg-deep: #070c14;
     --text: #edeff2;
@@ -17,7 +15,6 @@ const STYLES = `
     --accent: #f59e0b;
     --accent-2: #f97316;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; background: var(--bg-deep); }
   ::-webkit-scrollbar { width: 0; }
@@ -35,7 +32,6 @@ const STYLES = `
     0%, 100% { transform: scale(1) translate(0,0); opacity: 1; }
     50% { transform: scale(1.06) translate(-1%, 1%); opacity: 0.8; }
   }
-
   .blob { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(100px); opacity: 0.1; z-index: 0; }
   .blob-a { width: 400px; height: 400px; background: #f59e0b; top: -8%; right: -5%; animation: blobA 16s ease-in-out infinite; }
   .blob-b { width: 300px; height: 300px; background: #8b5cf6; bottom: -5%; left: -3%; animation: blobB 20s ease-in-out infinite; }
@@ -55,11 +51,14 @@ const STYLES = `
     width: 100%; height: 100%; object-fit: cover;
     filter: brightness(0.5) saturate(0.4);
     transition: transform 8s ease;
+    -webkit-mask-image: linear-gradient(to left, transparent 0%, black 18%);
+    mask-image: linear-gradient(to left, transparent 0%, black 18%);
   }
   .image-panel:hover img { transform: scale(1.08); }
   .image-overlay {
     position: absolute; inset: 0;
-    background: linear-gradient(to right, rgba(7,12,20,0.7), transparent 40%);
+    background: linear-gradient(to left, rgba(7,12,20,0.95), rgba(7,12,20,0.3) 30%, transparent 55%);
+    z-index: 2;
   }
   .image-quote {
     position: absolute; bottom: 60px; left: 60px; right: 60px; z-index: 5;
@@ -69,13 +68,80 @@ const STYLES = `
     text-shadow: 0 2px 20px rgba(0,0,0,0.5);
   }
 
+  /* ===== HARD BLEND SEAM (fusion antara 2 section) ===== */
+  .panel-seam {
+    position: absolute; top: 0; bottom: 0; left: 0; width: 100%;
+    z-index: 4; pointer-events: none; overflow: hidden;
+  }
+  .panel-seam::before {
+    content: ''; position: absolute; top: -10%; bottom: -10%; left: 50%;
+    width: 340px; transform: translateX(-50%);
+    background: radial-gradient(ellipse 55% 100% at 50% 50%, rgba(245,158,11,0.22) 0%, rgba(249,115,22,0.1) 35%, transparent 72%);
+    filter: blur(60px);
+    mix-blend-mode: screen;
+    animation: seamPulse 9s ease-in-out infinite;
+  }
+  .panel-seam::after {
+    content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
+    width: 120px; transform: translateX(-50%);
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.035), transparent);
+    mix-blend-mode: overlay;
+  }
+  @keyframes seamPulse {
+    0%, 100% { opacity: 0.7; transform: translateX(-50%) scaleY(1); }
+    50% { opacity: 1; transform: translateX(-50%) scaleY(1.08); }
+  }
+
+  /* ===== 3D FLOATING OBJECTS ===== */
+  .f3d-scene { position: absolute; pointer-events: none; z-index: 1; perspective: 900px; }
+  .f3d-cube {
+    width: 44px; height: 44px; position: relative; transform-style: preserve-3d;
+    animation: cubeFloat 14s ease-in-out infinite, cubeSpin 22s linear infinite;
+  }
+  .f3d-cube .face {
+    position: absolute; inset: 0; border: 1px solid rgba(245,158,11,0.35);
+    background: linear-gradient(135deg, rgba(245,158,11,0.10), rgba(249,115,22,0.03));
+    backdrop-filter: blur(2px);
+    box-shadow: inset 0 0 20px rgba(245,158,11,0.06);
+  }
+  .f3d-cube .f1 { transform: translateZ(22px); }
+  .f3d-cube .f2 { transform: rotateY(180deg) translateZ(22px); }
+  .f3d-cube .f3 { transform: rotateY(90deg) translateZ(22px); }
+  .f3d-cube .f4 { transform: rotateY(-90deg) translateZ(22px); }
+  .f3d-cube .f5 { transform: rotateX(90deg) translateZ(22px); }
+  .f3d-cube .f6 { transform: rotateX(-90deg) translateZ(22px); }
+  @keyframes cubeSpin { from { transform: rotateX(20deg) rotateY(0deg); } to { transform: rotateX(20deg) rotateY(360deg); } }
+  @keyframes cubeFloat { 0%,100% { margin-top: 0px; } 50% { margin-top: -18px; } }
+
+  .f3d-ring {
+    width: 70px; height: 70px; border-radius: 50%;
+    border: 1.5px solid rgba(139,92,246,0.3);
+    transform-style: preserve-3d;
+    box-shadow: 0 0 30px rgba(139,92,246,0.08), inset 0 0 20px rgba(139,92,246,0.05);
+    animation: ringFloat 16s ease-in-out infinite, ringSpin 26s linear infinite;
+  }
+  @keyframes ringSpin { from { transform: rotateX(72deg) rotateZ(0deg); } to { transform: rotateX(72deg) rotateZ(360deg); } }
+  @keyframes ringFloat { 0%,100% { margin-left: 0px; opacity: 0.6; } 50% { margin-left: -12px; opacity: 1; } }
+
+  .f3d-diamond {
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, rgba(245,158,11,0.5), rgba(249,115,22,0.15));
+    border: 1px solid rgba(245,158,11,0.4);
+    transform-style: preserve-3d;
+    box-shadow: 0 0 18px rgba(245,158,11,0.15);
+    animation: diamondFloat 11s ease-in-out infinite, diamondSpin 18s linear infinite;
+  }
+  @keyframes diamondSpin { from { transform: rotate(45deg) rotateY(0deg); } to { transform: rotate(45deg) rotateY(360deg); } }
+  @keyframes diamondFloat { 0%,100% { margin-top: 0px; } 50% { margin-top: 14px; } }
+
   /* Right Panel — Form */
   .form-panel {
-    flex: 1; display: flex; align-items: center; justify-content: center;
+    flex: 0.85; display: flex; align-items: center; justify-content: center;
     padding: 40px; position: relative; z-index: 5;
     background: rgba(7,12,20,0.4); backdrop-filter: blur(10px);
+    overflow: hidden;
   }
-  .form-inner { width: 100%; max-width: 420px; }
+  .form-inner { width: 80%; max-width: 420px; position: relative; z-index: 6; }
 
   /* Form elements */
   .input-group { position: relative; margin-bottom: 18px; }
@@ -98,7 +164,6 @@ const STYLES = `
   .input-group input:focus + .icon,
   .input-group input:focus ~ .icon { color: #f59e0b; }
   .input-group input::placeholder { color: #3a4458; }
-
   .toggle-password {
     position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
     background: none; border: none; color: #5a6478; cursor: pointer;
@@ -142,6 +207,7 @@ const STYLES = `
   @media (max-width: 768px) {
     .image-panel { display: none; }
     .form-panel { padding: 32px 24px; }
+    .f3d-scene { display: none; }
   }
 `;
 
@@ -160,30 +226,24 @@ export default function RegisterPage() {
     if (pwd.length < 10) return { width: "75%", color: "#f59e0b", label: "Almost there", textColor: "#f59e0b" };
     return { width: "100%", color: "#10b981", label: "Strong password", textColor: "#10b981" };
   };
-
   const strength = getStrength(password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
-
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters");
       return;
     }
-
     setLoading(true);
-
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Registration failed");
-
       toast.success("Welcome to ASCEND! Let's find your people.");
       router.push("/onboarding");
       router.refresh();
@@ -197,16 +257,18 @@ export default function RegisterPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
-
       <div className="ambient" />
       <div className="blob blob-a" />
       <div className="blob blob-b" />
 
       <div className="register-container">
+        {/* Hard blend seam between image & form */}
+        <div className="panel-seam" />
+
         {/* ============ LEFT — IMAGE ============ */}
         <div className="image-panel">
-          <div className="image-overlay" />
           <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200&q=80" alt="ASCEND" />
+          <div className="image-overlay" />
           <p className="image-quote afi d3">
             &ldquo;Your journey to greatness starts with a single step. Find your people. Build your future.&rdquo;
           </p>
@@ -214,6 +276,20 @@ export default function RegisterPage() {
 
         {/* ============ RIGHT — FORM ============ */}
         <div className="form-panel">
+          {/* 3D floating objects — dekat area textbox */}
+          <div className="f3d-scene" style={{ top: "12%", left: "6%" }}>
+            <div className="f3d-cube">
+              <div className="face f1" /><div className="face f2" /><div className="face f3" />
+              <div className="face f4" /><div className="face f5" /><div className="face f6" />
+            </div>
+          </div>
+          <div className="f3d-scene" style={{ bottom: "14%", right: "4%" }}>
+            <div className="f3d-ring" />
+          </div>
+          <div className="f3d-scene" style={{ top: "48%", left: "1%" }}>
+            <div className="f3d-diamond" />
+          </div>
+
           <div className="form-inner">
             {/* Logo */}
             <Link href="/" className="afi" style={{ display: "inline-flex", alignItems: "center", gap: "10px", textDecoration: "none", marginBottom: "36px" }}>
@@ -240,7 +316,6 @@ export default function RegisterPage() {
                   onChange={(e) => setName(e.target.value)} required
                 />
               </div>
-
               <div className="afu d3 input-group">
                 <Mail size={18} className="icon" />
                 <input
@@ -248,7 +323,6 @@ export default function RegisterPage() {
                   onChange={(e) => setEmail(e.target.value)} required
                 />
               </div>
-
               <div className="afu d4 input-group" style={{ marginBottom: "12px" }}>
                 <Lock size={18} className="icon" />
                 <input
@@ -280,7 +354,6 @@ export default function RegisterPage() {
             </form>
 
             <div className="afu d6 divider-text"><span>or</span></div>
-
             <p className="afu d6" style={{ textAlign: "center", fontSize: "14px", color: "#5a6478" }}>
               Already have an account?{" "}
               <Link href="/login" style={{ color: "#f59e0b", textDecoration: "none", fontWeight: 500, transition: "color 0.3s" }}>

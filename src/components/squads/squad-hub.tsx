@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Target, Users, LogOut, ChevronLeft, ChevronRight, Trash2, Shield, CheckSquare, Bell, Crown, MessageCircle, BookOpen, Sparkles } from "lucide-react";
+import { Plus, Target, Users, LogOut, ChevronLeft, ChevronRight, Trash2, Shield, CheckSquare, Bell, Crown, MessageCircle, BookOpen, Sparkles, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { ChatRoom } from "@/components/rooms/chat-room";
@@ -31,9 +31,12 @@ const STYLES = `
   .hub-sb-item.active::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:2px;background:#f59e0b;border-radius:0 2px 2px 0;}
   .hub-sb-item.danger{color:#5a6478;}
   .hub-sb-item.danger:hover{color:#ef4444;background:rgba(239,68,68,0.04);}
+  .hub-sb-item.disabled{opacity:0.5;cursor:not-allowed;pointer-events:none;}
+  .hub-sb-item .lock-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#5a6478;font-size:12px;}
   .hub-sb-icon{flex-shrink:0;}
   .hub-sidebar.collapsed .hub-sb-item{justify-content:center;padding:10px;}
   .hub-sidebar.collapsed .hub-sb-item::before{display:none;}
+  .hub-sidebar.collapsed .hub-sb-item .lock-icon{display:none;}
   .notif-badge{background:#ef4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:999px;font-weight:600;margin-left:auto;}
   .hub-sidebar.collapsed .notif-badge{position:absolute;top:4px;right:4px;margin-left:0;}
   .hub-sb-bottom{padding:14px 10px;border-top:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:6px;margin-top:auto;}
@@ -42,7 +45,6 @@ const STYLES = `
   .hub-sidebar.collapsed .hub-sb-leave{justify-content:center;padding:10px;}
   .hub-main{flex:1;min-width:0;overflow-y:auto;background:#0a0f18;display:flex;flex-direction:column;}
   
-  /* TOGGLE BUTTON - di kiri tengah */
   .sidebar-toggle {
     position: fixed;
     top: 50%;
@@ -137,6 +139,22 @@ const STYLES = `
   .modal-btn-create{background:linear-gradient(135deg,#f59e0b,#f97316);border:none;color:#0a0a0a;}
   .modal-btn-create:hover{transform:scale(1.03);}
   .modal-btn-create:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .required-banner {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.12);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 0 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fbbf24;
+    font-size: 12px;
+  }
+  .required-banner svg {
+    flex-shrink: 0;
+  }
 `;
 
 interface Room { id: string; name: string; type: string; order: number; }
@@ -148,6 +166,7 @@ export function SquadHub({
   memberCount, createdAt, ownerName, isMember, isOwner, isModerator,
   currentUserId, currentUserName, rooms: initialRooms, members,
   activeRoomId: initialActiveRoomId, activeView: initialActiveView,
+  isNewSquad = false,
 }: {
   squadId: string; squadName: string; squadIcon: string; squadGoal: string;
   squadCategory: string; squadDescription: string; memberCount: number;
@@ -155,6 +174,7 @@ export function SquadHub({
   isModerator: boolean; currentUserId: string; currentUserName: string;
   rooms: Room[]; members: Member[];
   activeRoomId?: string; activeView?: string;
+  isNewSquad?: boolean;
 }) {
   const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
@@ -170,11 +190,22 @@ export function SquadHub({
   const [notifications, setNotifications] = useState<{ id: string; text: string; time: string; type: string }[]>([]);
   const [memberPage, setMemberPage] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [hasShownModal, setHasShownModal] = useState(false);
   const MEMBERS_PER_PAGE = 20;
 
-  // Untuk swipe detection
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
+
+  // Auto-show create modal for new squad
+  useEffect(() => {
+    if (isNewSquad && !hasShownModal && rooms.length === 0) {
+      setHasShownModal(true);
+      // Delay sedikit biar UI kebaca dulu
+      setTimeout(() => {
+        setShowCreateModal(true);
+      }, 500);
+    }
+  }, [isNewSquad, hasShownModal, rooms.length]);
 
   useEffect(() => { setRooms(initialRooms); setLocalMembers(members); }, [initialRooms, members]);
   useEffect(() => { fetch(`/api/squads/${squadId}/notifications`).then(r => r.json()).then(d => setNotifications(Array.isArray(d) ? d : [])).catch(() => {}); }, [squadId]);
@@ -192,7 +223,6 @@ export function SquadHub({
       const diffX = touchEndX - touchStartX.current;
       const diffY = touchEndY - touchStartY.current;
 
-      // Swipe dari kiri ke kanan (lebih dari 50px) dan bukan swipe vertikal
       if (diffX > 50 && Math.abs(diffX) > Math.abs(diffY) && touchStartX.current < 30) {
         setMobileOpen(true);
       }
@@ -211,8 +241,15 @@ export function SquadHub({
   const canManage = isOwner || isModerator;
   const totalMemberPages = Math.ceil(localMembers.length / MEMBERS_PER_PAGE);
   const paginatedMembers = localMembers.slice(memberPage * MEMBERS_PER_PAGE, (memberPage + 1) * MEMBERS_PER_PAGE);
+  const hasNoRooms = rooms.length === 0;
 
   const handleViewChange = (view: string, roomId?: string) => {
+    // Block navigation if no rooms
+    if (hasNoRooms && view !== "welcome") {
+      toast.warning("Create a room first!");
+      return;
+    }
+    
     setLoading(true);
     setTimeout(() => {
       setActiveView(view as ViewType);
@@ -228,10 +265,14 @@ export function SquadHub({
       const res = await fetch(`/api/squads/${squadId}/rooms`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: newRoomName.trim(), type: newRoomType }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setRooms([...rooms, data.room]); setNewRoomName(""); setShowCreateModal(false);
-      setActiveRoomId(data.room.id); setActiveView(data.room.type === "CHAT" ? "chat" : "study");
-      toast.success("Room created!"); router.refresh();
-    } catch { toast.error("Failed"); }
+      setRooms([...rooms, data.room]); 
+      setNewRoomName(""); 
+      setShowCreateModal(false);
+      setActiveRoomId(data.room.id); 
+      setActiveView(data.room.type === "CHAT" ? "chat" : "study");
+      toast.success("Room created! 🎉"); 
+      router.refresh();
+    } catch { toast.error("Failed to create room"); }
     setCreating(false);
   };
 
@@ -279,7 +320,25 @@ export function SquadHub({
 
   const renderContent = () => {
     if (activeView === "welcome" || rooms.length === 0) return (
-      <div className="welcome-wrap"><div className="welcome-icon">{squadIcon}</div><h2 className="welcome-title">Welcome to {squadName}</h2><p className="welcome-desc">This is your squad&apos;s home base. Create your first room to start collaborating with your team. Chat rooms for discussions, Study rooms for focused work sessions.</p>{canManage ? <button className="welcome-btn" onClick={() => setShowCreateModal(true)}><Plus size={18} /> Create Your First Room</button> : <p style={{ color: "#5a6478", fontSize: "13px" }}>Ask the owner to create a room.</p>}</div>
+      <div className="welcome-wrap">
+        <div className="welcome-icon">{squadIcon}</div>
+        <h2 className="welcome-title">
+          {hasNoRooms ? "Let's Create Your First Room!" : `Welcome to ${squadName}`}
+        </h2>
+        <p className="welcome-desc">
+          {hasNoRooms 
+            ? "Every squad needs a room to start collaborating. Create your first room now!"
+            : "This is your squad's home base. Create your first room to start collaborating with your team. Chat rooms for discussions, Study rooms for focused work sessions."
+          }
+        </p>
+        {canManage ? (
+          <button className="welcome-btn" onClick={() => setShowCreateModal(true)}>
+            <Plus size={18} /> {hasNoRooms ? "Create Your First Room" : "Create Room"}
+          </button>
+        ) : (
+          <p style={{ color: "#5a6478", fontSize: "13px" }}>Ask the owner to create a room.</p>
+        )}
+      </div>
     );
     if (activeView === "chat" && activeRoom) return <ChatRoom roomId={activeRoom.id} roomName={activeRoom.name} currentUserId={currentUserId} currentUserName={currentUserName} />;
     if (activeView === "study" && activeRoom) return <StudyRoom roomId={activeRoom.id} roomName={activeRoom.name} currentUserId={currentUserId} currentUserName={currentUserName} isOwner={isOwner} squadId={squadId} />;
@@ -337,7 +396,9 @@ export function SquadHub({
       {showCreateModal && (
         <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setShowCreateModal(false)}>
           <motion.div className="modal-card" initial={{ scale: 0.95 }} animate={{ scale: 1 }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="modal-title"><Sparkles size={16} style={{ color: "#f59e0b", marginRight: "6px", display: "inline" }} />Create Room</h3>
+            <h3 className="modal-title"><Sparkles size={16} style={{ color: "#f59e0b", marginRight: "6px", display: "inline" }} />
+              {isNewSquad && rooms.length === 0 ? "Create Your First Room 🚀" : "Create Room"}
+            </h3>
             <input className="modal-input" placeholder="Room name..." value={newRoomName} onChange={(e) => setNewRoomName(e.target.value)} autoFocus />
             <div className="modal-type-row">
               <div 
@@ -372,30 +433,48 @@ export function SquadHub({
           </div>
           <nav className="hub-sb-nav">
             <p className="hub-sb-section-title">Rooms</p>
-            {rooms.map((room) => (
-              <button key={room.id} className={`hub-sb-item ${activeRoomId === room.id ? "active" : ""}`} onClick={() => { setActiveRoomId(room.id); setActiveView(room.type === "CHAT" ? "chat" : "study"); setMobileOpen(false); }}>
-                {room.type === "CHAT" ? <MessageCircle size={19} className="hub-sb-icon" /> : <BookOpen size={19} className="hub-sb-icon" />}{!collapsed && <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{room.name}</span>}
-                {canManage && !collapsed && <span onClick={(e) => { e.stopPropagation(); handleDeleteRoom(room.id); }} style={{ marginLeft: "auto", color: "#5a6478", cursor: "pointer", fontSize: "14px", opacity: 0, transition: "opacity 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.opacity = "1"} onMouseLeave={(e) => e.currentTarget.style.opacity = "0"}>🗑️</span>}
-              </button>
-            ))}
+            {rooms.length === 0 ? (
+              <div style={{ padding: "8px 14px", color: "#5a6478", fontSize: "11px", fontStyle: "italic" }}>
+                No rooms yet. Create one!
+              </div>
+            ) : (
+              rooms.map((room) => (
+                <button key={room.id} className={`hub-sb-item ${activeRoomId === room.id ? "active" : ""}`} onClick={() => { setActiveRoomId(room.id); setActiveView(room.type === "CHAT" ? "chat" : "study"); setMobileOpen(false); }}>
+                  {room.type === "CHAT" ? <MessageCircle size={19} className="hub-sb-icon" /> : <BookOpen size={19} className="hub-sb-icon" />}{!collapsed && <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{room.name}</span>}
+                  {canManage && !collapsed && <span onClick={(e) => { e.stopPropagation(); handleDeleteRoom(room.id); }} style={{ marginLeft: "auto", color: "#5a6478", cursor: "pointer", fontSize: "14px", opacity: 0, transition: "opacity 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.opacity = "1"} onMouseLeave={(e) => e.currentTarget.style.opacity = "0"}>🗑️</span>}
+                </button>
+              ))
+            )}
             {canManage && <button className="hub-sb-item" onClick={() => { setShowCreateModal(true); setMobileOpen(false); }}><Plus size={19} className="hub-sb-icon" />{!collapsed && <span>Add Room</span>}</button>}
             
             <p className="hub-sb-section-title" style={{ marginTop: "4px" }}>Squad</p>
             
-            <button className={`hub-sb-item ${activeView === "tasks" ? "active" : ""}`} onClick={() => { setActiveView("tasks"); setMobileOpen(false); }}>
+            <button 
+              className={`hub-sb-item ${activeView === "tasks" ? "active" : ""} ${hasNoRooms ? "disabled" : ""}`} 
+              onClick={() => handleViewChange("tasks")}
+            >
               <CheckSquare size={19} className="hub-sb-icon" />
               {!collapsed && <span>Squad Tasks</span>}
+              {hasNoRooms && !collapsed && <span className="lock-icon">🔒</span>}
             </button>
             
-            <button className={`hub-sb-item ${activeView === "members" ? "active" : ""}`} onClick={() => { setActiveView("members"); setMobileOpen(false); }}>
+            <button 
+              className={`hub-sb-item ${activeView === "members" ? "active" : ""} ${hasNoRooms ? "disabled" : ""}`} 
+              onClick={() => handleViewChange("members")}
+            >
               <Users size={19} className="hub-sb-icon" />
               {!collapsed && <span>Members</span>}
+              {hasNoRooms && !collapsed && <span className="lock-icon">🔒</span>}
             </button>
             
-            <button className={`hub-sb-item ${activeView === "notifications" ? "active" : ""}`} onClick={() => { setActiveView("notifications"); setMobileOpen(false); }}>
+            <button 
+              className={`hub-sb-item ${activeView === "notifications" ? "active" : ""} ${hasNoRooms ? "disabled" : ""}`} 
+              onClick={() => handleViewChange("notifications")}
+            >
               <Bell size={19} className="hub-sb-icon" />
               {!collapsed && <span>Notifications</span>}
               {notifications.length > 0 && <span className="notif-badge">{notifications.length}</span>}
+              {hasNoRooms && !collapsed && <span className="lock-icon">🔒</span>}
             </button>
           </nav>
           
@@ -421,9 +500,17 @@ export function SquadHub({
           </div>
         </aside>
         
-        <main className={`hub-main ${collapsed ? 'sidebar-collapsed' : ''}`}>{renderContent()}</main>
+        <main className={`hub-main ${collapsed ? 'sidebar-collapsed' : ''}`}>
+          {/* Banner kalo belum ada room */}
+          {hasNoRooms && (
+            <div className="required-banner">
+              <AlertCircle size={16} />
+              <span>Create your first room to unlock all features!</span>
+            </div>
+          )}
+          {renderContent()}
+        </main>
         
-        {/* Toggle Button - di kiri tengah */}
         <motion.button 
           className={`sidebar-toggle ${mobileOpen ? 'hidden' : ''}`}
           onClick={() => setMobileOpen(true)}

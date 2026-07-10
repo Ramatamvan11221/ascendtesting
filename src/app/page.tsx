@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Users, Sparkles, TrendingUp, Zap, Star, ChevronRight } from "lucide-react";
+import { ArrowRight, Users, Sparkles, TrendingUp, Zap, Star, Camera, Mail, Code } from "lucide-react";
 
 // ─── STYLES ──────────────────────────────────────────────────────────────
 const STYLES = `
@@ -10,6 +10,7 @@ const STYLES = `
 
   :root {
     --bg-deep: #070c14;
+    --bg-deep-right: #0d0716;
     --bg-card: rgba(18, 25, 40, 0.55);
     --text: #edeff2;
     --text-secondary: #9aa4b8;
@@ -161,6 +162,32 @@ const STYLES = `
   @media (min-width: 480px) { .hero-section { padding: 90px 24px 80px; } }
   @media (min-width: 768px) { .hero-section { padding: 90px 32px 80px; } }
 
+  /* ── Hard split background (not a fade — a torn, jagged seam) ── */
+  .hero-split-bg { position: absolute; inset: 0; z-index: 0; }
+  .hero-split-panel-left {
+    position: absolute; inset: 0;
+    background: var(--bg-deep);
+    clip-path: polygon(0% 0%, 60% 0%, 52% 18%, 66% 38%, 48% 58%, 62% 78%, 54% 100%, 0% 100%);
+  }
+  .hero-split-panel-right {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.10), transparent 60%),
+      var(--bg-deep-right);
+    clip-path: polygon(100% 0%, 60% 0%, 52% 18%, 66% 38%, 48% 58%, 62% 78%, 54% 100%, 100% 100%);
+  }
+  /* thin hot seam line traced along the same jagged path, sitting on top of the cut */
+  .hero-split-seam {
+    position: absolute; inset: 0;
+    clip-path: polygon(0% 0%, 60% 0%, 52% 18%, 66% 38%, 48% 58%, 62% 78%, 54% 100%, 0% 100%);
+    -webkit-mask: linear-gradient(#000, #000);
+    box-shadow: inset -2px 0 0 0 rgba(245,158,11,0.35);
+  }
+  @media (max-width: 1023px) {
+    .hero-split-panel-left, .hero-split-panel-right, .hero-split-seam { clip-path: none; }
+    .hero-split-panel-right { display: none; }
+  }
+
   .hero-content { position: relative; z-index: 15; width: 100%; max-width: 700px; margin: 0 auto; }
   @media (min-width: 1024px) { .hero-content { margin: 0; } }
 
@@ -188,7 +215,7 @@ const STYLES = `
 
   .testimonial-grid { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
   @media (min-width: 768px) { .testimonial-grid { grid-template-columns: 1fr 1fr; gap: 72px; } }
-  .testimonial-img { height: 280px; border-radius: 20px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,0.0); }
+  .testimonial-img { height: 280px; border-radius: 20px; overflow: hidden; }
   @media (min-width: 768px) { .testimonial-img { height: 420px; } }
   .testimonial-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(1) saturate(1); }
 
@@ -223,6 +250,81 @@ const STYLES = `
     font-size: 9px; font-weight: 600; letter-spacing: 0.04em;
     color: var(--amber);
   }
+
+  /* ── 3D objects (pure CSS, no extra deps) ── */
+  .scene3d { perspective: 1000px; position: absolute; }
+  .cube3d {
+    width: 90px; height: 90px; position: relative;
+    transform-style: preserve-3d;
+    animation: cubeSpin 14s linear infinite;
+  }
+  .cube3d .face {
+    position: absolute; width: 90px; height: 90px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(135deg, rgba(245,158,11,0.28), rgba(139,92,246,0.22));
+    backdrop-filter: blur(2px);
+    box-shadow: inset 0 0 30px rgba(245,158,11,0.08);
+  }
+  .cube3d .front  { transform: translateZ(45px); }
+  .cube3d .back   { transform: translateZ(-45px) rotateY(180deg); }
+  .cube3d .right  { transform: rotateY(90deg) translateZ(45px); }
+  .cube3d .left   { transform: rotateY(-90deg) translateZ(45px); }
+  .cube3d .top    { transform: rotateX(90deg) translateZ(45px); background: linear-gradient(135deg, rgba(249,115,22,0.3), rgba(245,158,11,0.18)); }
+  .cube3d .bottom { transform: rotateX(-90deg) translateZ(45px); }
+  @keyframes cubeSpin {
+    from { transform: rotateX(0deg) rotateY(0deg); }
+    to   { transform: rotateX(360deg) rotateY(360deg); }
+  }
+
+  .ring3d {
+    width: 140px; height: 140px; border-radius: 50%;
+    border: 2px solid rgba(245,158,11,0.35);
+    position: relative;
+    transform-style: preserve-3d;
+    animation: ringTumble 18s linear infinite;
+  }
+  .ring3d::before, .ring3d::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+  }
+  .ring3d::before { border: 2px solid rgba(139,92,246,0.3); transform: rotateX(60deg); }
+  .ring3d::after { border: 2px solid rgba(249,115,22,0.28); transform: rotateY(60deg); }
+  @keyframes ringTumble {
+    from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    to   { transform: rotateX(360deg) rotateY(180deg) rotateZ(360deg); }
+  }
+
+  .shard3d {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--amber), var(--purple));
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    opacity: 0.35;
+    animation: shardFloat 9s ease-in-out infinite;
+    filter: blur(0.3px);
+  }
+  @keyframes shardFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-24px) rotate(180deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cube3d, .ring3d, .shard3d, .orb, .text-gradient { animation: none !important; }
+  }
+
+  /* ── Contact section ── */
+  .contact-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 640px) { .contact-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; } }
+  .contact-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px; border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.05);
+    text-decoration: none;
+    transition: all 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .contact-card:hover { transform: translateY(-4px); border-color: rgba(245,158,11,0.25); box-shadow: 0 20px 40px -24px rgba(245,158,11,0.25); }
+  .contact-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .contact-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .contact-value { font-size: 14px; color: var(--text); font-weight: 600; }
 `;
 
 // ─── COMPONENTS ──────────────────────────────────────────────────────────
@@ -339,11 +441,18 @@ export default function LandingPage() {
 
         {/* ─── HERO ────────────────────────────────────────────────── */}
         <section className="hero-section">
+          {/* Hard, jagged two-tone split — not a fade, a torn seam between the copy side and the visual side */}
+          <div className="hero-split-bg" aria-hidden="true">
+            <div className="hero-split-panel-left" />
+            <div className="hero-split-panel-right" />
+            <div className="hero-split-seam" />
+          </div>
+
           <div className="hero-content">
             <div className="afi" style={{ marginBottom: "20px" }}>
               <span className="section-tag">
                 <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#f59e0b", display: "inline-block", marginRight: "6px" }} />
-                THE APP FOR AMBITIOUS PEOPLE
+                PARTNER FOR AMBITIOUS PEOPLE
               </span>
             </div>
 
@@ -374,24 +483,34 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* ── Desktop cinematic visual ── */}
+          {/* ── Desktop cinematic visual (right, "image" side of the split) ── */}
           {isDesktop && (
             <div className="desktop-hero-visual" style={{ position: "absolute", right: "-20px", top: "45%", transform: "translateY(-50%)", width: "480px", height: "480px", zIndex: 5, pointerEvents: "none" }}>
               {/* Main card */}
-              <div className="floating-card" style={{ width: "300px", height: "300px", top: "5%", left: "5%", borderRadius: "24px", borderColor: "rgba(245,158,11,0.12)" }}>
+              <div className="floating-card" style={{ width: "280px", height: "280px", top: "8%", left: "16%", borderRadius: "24px", borderColor: "rgba(245,158,11,0.12)" }}>
                 <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80" alt="Community" />
                 <div className="label">FIND YOUR SQUAD</div>
               </div>
-              {/* Small card top-right */}
-              <div className="floating-card" style={{ width: "90px", height: "64px", top: "-6%", right: "12%", borderRadius: "12px", borderColor: "rgba(245,158,11,0.08)" }}>
-                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=200&q=80" alt="AI" />
-                <div className="label" style={{ fontSize: "7px", padding: "6px 10px" }}>AI</div>
+
+              {/* 3D cube, floating top-right of the main card */}
+              <div className="scene3d" style={{ top: "-4%", right: "6%" }}>
+                <div className="cube3d">
+                  <div className="face front" />
+                  <div className="face back" />
+                  <div className="face right" />
+                  <div className="face left" />
+                  <div className="face top" />
+                  <div className="face bottom" />
+                </div>
               </div>
-              {/* Small card bottom-right */}
-              <div className="floating-card" style={{ width: "80px", height: "60px", top: "62%", right: "2%", borderRadius: "10px", borderColor: "rgba(249,115,22,0.08)" }}>
-                <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=200&q=80" alt="Progress" />
-                <div className="label" style={{ fontSize: "7px", padding: "6px 10px" }}>GROWTH</div>
+
+              {/* 3D tumbling ring, bottom-right */}
+              <div className="scene3d" style={{ bottom: "0%", right: "-8%" }}>
+                <div className="ring3d" />
               </div>
+
+              {/* Floating shard accent */}
+              <div className="shard3d" style={{ position: "absolute", top: "60%", left: "-6%" }} />
             </div>
           )}
         </section>
@@ -399,8 +518,9 @@ export default function LandingPage() {
         <WaveDivider />
 
         {/* ─── FEATURES ────────────────────────────────────────────── */}
-        <section className="section-pad" style={{ background: "#0f1923" }}>
-          <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <section className="section-pad" style={{ background: "#0f1923", position: "relative", overflow: "hidden" }}>
+          <div className="shard3d" style={{ position: "absolute", top: "6%", right: "6%", opacity: 0.2 }} />
+          <div style={{ maxWidth: "1100px", margin: "0 auto", position: "relative" }}>
             <div style={{ textAlign: "center", marginBottom: "40px" }}>
               <span className="section-tag afi">Why ASCEND</span>
               <h2 className="display-text afu" style={{ color: "#edeff2", marginTop: "12px", fontStyle: "normal", fontWeight: 700, fontSize: "clamp(28px, 5vw, 48px)" }}>
@@ -461,8 +581,11 @@ export default function LandingPage() {
         <WaveDividerDeep />
 
         {/* ─── CTA ──────────────────────────────────────────────────── */}
-        <section className="section-pad" style={{ background: "#070c14", textAlign: "center" }}>
-          <div className="sr" style={{ maxWidth: "600px", margin: "0 auto" }}>
+        <section className="section-pad" style={{ background: "#070c14", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <div className="scene3d" style={{ top: "8%", left: "6%", display: isDesktop ? "block" : "none" }}>
+            <div className="ring3d" style={{ width: "100px", height: "100px" }} />
+          </div>
+          <div className="sr" style={{ maxWidth: "600px", margin: "0 auto", position: "relative" }}>
             <div className="asi" style={{ marginBottom: "24px" }}>
               <div style={{
                 width: "56px", height: "56px", borderRadius: "16px",
@@ -483,6 +606,48 @@ export default function LandingPage() {
               <ArrowRight size={16} /> {loggedIn ? "Dashboard" : "Enter ASCEND"}
             </Link>
             <p style={{ marginTop: "20px", fontSize: "12px", color: "#5a6478" }}>Find Your People. Build Your Future.</p>
+          </div>
+        </section>
+
+        {/* ─── CONTACT ──────────────────────────────────────────────── */}
+        <section className="section-pad sr" style={{ background: "#04070a", paddingBottom: "48px" }}>
+          <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: "28px" }}>
+              <span className="section-tag">Get In Touch</span>
+              <h3 style={{ fontSize: "20px", fontWeight: 700, color: "#edeff2", marginTop: "12px" }}>
+                Talk to the team behind ASCEND
+              </h3>
+            </div>
+            <div className="contact-grid">
+              {/* TODO: ganti href & value di bawah dengan akun/kontak asli */}
+              <a href="https://instagram.com/ascend.id" target="_blank" rel="noopener noreferrer" className="contact-card">
+                <div className="contact-icon" style={{ background: "rgba(236,72,153,0.14)" }}>
+                  <Camera size={18} style={{ color: "#ec4899" }} />
+                </div>
+                <div>
+                  <p className="contact-label">Instagram</p>
+                  <p className="contact-value">@ascend.id</p>
+                </div>
+              </a>
+              <a href="mailto:hello@ascend.app" className="contact-card">
+                <div className="contact-icon" style={{ background: "rgba(245,158,11,0.14)" }}>
+                  <Mail size={18} style={{ color: "#f59e0b" }} />
+                </div>
+                <div>
+                  <p className="contact-label">Email</p>
+                  <p className="contact-value">hello@ascend.app</p>
+                </div>
+              </a>
+              <a href="https://github.com/ascend-dev" target="_blank" rel="noopener noreferrer" className="contact-card">
+                <div className="contact-icon" style={{ background: "rgba(139,92,246,0.14)" }}>
+                  <Code size={18} style={{ color: "#8b5cf6" }} />
+                </div>
+                <div>
+                  <p className="contact-label">Developer</p>
+                  <p className="contact-value">@ascend-dev</p>
+                </div>
+              </a>
+            </div>
           </div>
         </section>
 

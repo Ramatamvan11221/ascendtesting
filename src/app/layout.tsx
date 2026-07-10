@@ -24,17 +24,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning className="dark">
+    <html lang="id" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider
-          attribute="class"
+          attribute="data-theme"
           defaultTheme="dark"
           enableSystem={false}
           disableTransitionOnChange
+          storageKey="ascend-theme"
         >
           <div className="animated-bg" />
           {children}
-          <Toaster position="top-right" theme="dark" closeButton />
+          <Toaster 
+            position="top-right" 
+            closeButton 
+            toastOptions={{
+              style: {
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-subtle)',
+                backdropFilter: 'blur(20px)',
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
