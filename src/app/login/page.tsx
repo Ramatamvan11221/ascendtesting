@@ -36,7 +36,7 @@ const STYLES = `
 
   /* Left Panel — Form */
   .form-panel {
-    flex: 0.85; display: flex; align-items: center; justify-content: center;
+    flex: 1; display: flex; align-items: center; justify-content: center;
     padding: 40px; position: relative; z-index: 5;
     background: var(--bg-card); backdrop-filter: blur(10px);
     overflow: hidden;
