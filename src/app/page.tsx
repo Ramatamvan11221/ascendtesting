@@ -198,6 +198,18 @@ const STYLES = `
     .hero-split-panel-right { display: none; }
   }
 
+  /* ── Hero container: centers everything on wide screens ── */
+  .hero-container {
+    position: relative;
+    z-index: 15;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    min-height: 100%;
+  }
+
   .hero-content { position: relative; z-index: 15; width: 100%; max-width: 700px; margin: 0 auto; }
   @media (min-width: 1024px) { .hero-content { margin: 0; } }
 
@@ -239,7 +251,17 @@ const STYLES = `
   .wave-divider { position: relative; margin-top: -70px; }
   .wave-divider svg { display: block; width: 100%; height: 100px; }
 
-  .desktop-hero-visual { display: none; }
+  .desktop-hero-visual {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 480px;
+    height: 480px;
+    z-index: 5;
+    pointer-events: none;
+  }
   @media (min-width: 1024px) { .desktop-hero-visual { display: block; } }
 
   /* ── Floating hero elements (cinematic depth) ── */
@@ -463,71 +485,73 @@ export default function LandingPage() {
             <div className="hero-split-seam" />
           </div>
 
-          <div className="hero-content">
-            <div className="afi" style={{ marginBottom: "20px" }}>
-              <span className="section-tag">
-                <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--amber)", display: "inline-block", marginRight: "6px" }} />
-                PARTNER FOR AMBITIOUS PEOPLE
-              </span>
-            </div>
-
-            <h1 className="hero-title afu">
-              <span className="hero-word">FIND YOUR</span><br />
-              <span className="hero-word text-gradient">PEOPLE.</span><br />
-              <span className="hero-word">BUILD YOUR</span><br />
-              <span className="hero-word text-gradient">FUTURE.</span>
-            </h1>
-
-            <p className="afu d3" style={{ fontSize: "15px", fontWeight: 300, color: "var(--text-secondary)", maxWidth: "440px", margin: "20px 0 28px", lineHeight: 1.7 }}>
-              ASCEND connects ambitious individuals with like-minded communities. AI-powered roadmaps, realtime collaboration, and the accountability to rise together.
-            </p>
-
-            <div className="afu d5" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <Link href={ctaLink} className="btn btn-primary">
-                <ArrowRight size={14} /> {loggedIn ? "Dashboard" : "Start Your Journey"}
-              </Link>
-              <Link href="/squads" className="btn btn-outline">
-                <Users size={14} /> Explore Squads
-              </Link>
-            </div>
-
-            <div className="afu d7 stats-row">
-              <div><p className="stat-value">4,800+</p><p className="stat-label">Dreamers</p></div>
-              <div><p className="stat-value">200+</p><p className="stat-label">Squads</p></div>
-              <div><p className="stat-value">32K+</p><p className="stat-label">Tasks</p></div>
-            </div>
-          </div>
-
-          {/* ── Desktop cinematic visual (right, "image" side of the split) ── */}
-          {isDesktop && (
-            <div className="desktop-hero-visual" style={{ position: "absolute", right: "-20px", top: "45%", transform: "translateY(-50%)", width: "480px", height: "480px", zIndex: 5, pointerEvents: "none" }}>
-              {/* Main card */}
-              <div className="floating-card" style={{ width: "280px", height: "280px", top: "8%", left: "16%", borderRadius: "24px", borderColor: "rgba(245,158,11,0.12)" }}>
-                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80" alt="Community" />
-                <div className="label">FIND YOUR SQUAD</div>
+          <div className="hero-container">
+            <div className="hero-content">
+              <div className="afi" style={{ marginBottom: "20px" }}>
+                <span className="section-tag">
+                  <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--amber)", display: "inline-block", marginRight: "6px" }} />
+                  PARTNER FOR AMBITIOUS PEOPLE
+                </span>
               </div>
 
-              {/* 3D cube, floating top-right of the main card */}
-              <div className="scene3d" style={{ top: "-4%", right: "6%" }}>
-                <div className="cube3d">
-                  <div className="face front" />
-                  <div className="face back" />
-                  <div className="face right" />
-                  <div className="face left" />
-                  <div className="face top" />
-                  <div className="face bottom" />
+              <h1 className="hero-title afu">
+                <span className="hero-word">FIND YOUR</span><br />
+                <span className="hero-word text-gradient">PEOPLE.</span><br />
+                <span className="hero-word">BUILD YOUR</span><br />
+                <span className="hero-word text-gradient">FUTURE.</span>
+              </h1>
+
+              <p className="afu d3" style={{ fontSize: "15px", fontWeight: 300, color: "var(--text-secondary)", maxWidth: "440px", margin: "20px 0 28px", lineHeight: 1.7 }}>
+                ASCEND connects ambitious individuals with like-minded communities. AI-powered roadmaps, realtime collaboration, and the accountability to rise together.
+              </p>
+
+              <div className="afu d5" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <Link href={ctaLink} className="btn btn-primary">
+                  <ArrowRight size={14} /> {loggedIn ? "Dashboard" : "Start Your Journey"}
+                </Link>
+                <Link href="/squads" className="btn btn-outline">
+                  <Users size={14} /> Explore Squads
+                </Link>
+              </div>
+
+              <div className="afu d7 stats-row">
+                <div><p className="stat-value">4,800+</p><p className="stat-label">Dreamers</p></div>
+                <div><p className="stat-value">200+</p><p className="stat-label">Squads</p></div>
+                <div><p className="stat-value">32K+</p><p className="stat-label">Tasks</p></div>
+              </div>
+            </div>
+
+            {/* ── Desktop cinematic visual (right, "image" side of the split) ── */}
+            {isDesktop && (
+              <div className="desktop-hero-visual">
+                {/* Main card */}
+                <div className="floating-card" style={{ width: "280px", height: "280px", top: "8%", left: "16%", borderRadius: "24px", borderColor: "rgba(245,158,11,0.12)" }}>
+                  <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80" alt="Community" />
+                  <div className="label">FIND YOUR SQUAD</div>
                 </div>
-              </div>
 
-              {/* 3D tumbling ring, bottom-right */}
-              <div className="scene3d" style={{ bottom: "0%", right: "-8%" }}>
-                <div className="ring3d" />
-              </div>
+                {/* 3D cube, floating top-right of the main card */}
+                <div className="scene3d" style={{ top: "-4%", right: "6%" }}>
+                  <div className="cube3d">
+                    <div className="face front" />
+                    <div className="face back" />
+                    <div className="face right" />
+                    <div className="face left" />
+                    <div className="face top" />
+                    <div className="face bottom" />
+                  </div>
+                </div>
 
-              {/* Floating shard accent */}
-              <div className="shard3d" style={{ position: "absolute", top: "60%", left: "-6%" }} />
-            </div>
-          )}
+                {/* 3D tumbling ring, bottom-right */}
+                <div className="scene3d" style={{ bottom: "0%", right: "-8%" }}>
+                  <div className="ring3d" />
+                </div>
+
+                {/* Floating shard accent */}
+                <div className="shard3d" style={{ position: "absolute", top: "60%", left: "-6%" }} />
+              </div>
+            )}
+          </div>
         </section>
 
         <WaveDivider />
