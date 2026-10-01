@@ -526,7 +526,7 @@ export default function LandingPage() {
               <div className="desktop-hero-visual">
                 {/* Main card */}
                 <div className="floating-card" style={{ width: "280px", height: "280px", top: "8%", left: "16%", borderRadius: "24px", borderColor: "rgba(245,158,11,0.12)" }}>
-                  <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400" alt="Community" />
+                  <img src="no" alt="Community" />
                   <div className="label">FIND YOUR SQUAD</div>
                 </div>
 
